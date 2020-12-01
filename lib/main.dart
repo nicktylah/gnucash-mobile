@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:english_words/english_words.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
+
+const biggerFont = TextStyle(fontSize: 18.0);
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -20,13 +20,17 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.amber,
         // This makes the visual density adapt to the platform that you run
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Scaffold(
+          body: MyHomePage(
+        title: 'Name Generator',
+      )),
+      // home: MyHomePage(title: 'Name Generator'),
     );
   }
 }
@@ -50,17 +54,47 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final savedSuggestions = <WordPair>[];
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (BuildContext context) {
+        final tiles = savedSuggestions.map(
+          (WordPair pair) {
+            return new Builder(builder: (context) {
+              return Dismissible(
+                background: Container(color: Colors.red),
+                key: Key(pair.asPascalCase),
+                onDismissed: (direction) {
+                  setState(() {
+                    savedSuggestions.remove(pair);
+                  });
+
+                  Scaffold.of(context)
+                      .showSnackBar(SnackBar(content: Text("${pair.asPascalCase} removed")));
+                },
+                child: ListTile(
+                  title: Text(
+                    pair.asPascalCase,
+                    style: biggerFont,
+                  ),
+                ),
+              );
+            });
+          },
+        );
+        final divided = ListTile.divideTiles(
+          context: context,
+          tiles: tiles,
+        ).toList();
+
+        return Scaffold(
+            appBar: AppBar(
+              title: Text('Saved Suggestions'),
+            ),
+            body: ListView(children: divided));
+      }),
+    );
   }
 
   @override
@@ -73,45 +107,68 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        leading: IconButton(icon: Icon(Icons.menu), onPressed: _pushSaved),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: RandomWords(savedSuggestions: savedSuggestions),
     );
+  }
+}
+
+class RandomWords extends StatefulWidget {
+  RandomWords({Key key, this.savedSuggestions}) : super(key: key);
+
+  final List<WordPair> savedSuggestions;
+
+  @override
+  _RandomWordsState createState() => _RandomWordsState();
+}
+
+class _RandomWordsState extends State<RandomWords> {
+  final _suggestions = <WordPair>[];
+
+  Widget _buildSuggestions() {
+    return ListView.builder(
+      padding: EdgeInsets.all(16.0),
+      itemBuilder: (context, i) {
+        if (i.isOdd) return Divider();
+
+        final index = i ~/ 2;
+        if (index >= _suggestions.length) {
+          _suggestions.addAll(generateWordPairs().take(10));
+        }
+
+        return _buildRow(_suggestions[index]);
+      },
+    );
+  }
+
+  Widget _buildRow(WordPair pair) {
+    final isSaved = widget.savedSuggestions.contains(pair);
+
+    return ListTile(
+      title: Text(
+        pair.asPascalCase,
+        style: biggerFont,
+      ),
+      trailing: Icon(
+        isSaved ? Icons.favorite : Icons.favorite_border,
+        color: isSaved ? Colors.red : null,
+      ),
+      onTap: () {
+        setState(() {
+          if (isSaved) {
+            widget.savedSuggestions.remove(pair);
+          } else {
+            widget.savedSuggestions.add(pair);
+          }
+        });
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildSuggestions();
   }
 }
