@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
 
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       title: Constants.appName,
       theme: Constants.lightTheme,
       darkTheme: Constants.darkTheme,
-        home: MyHomePage(title: 'Accounts'),
+      home: MyHomePage(title: 'Accounts'),
     );
   }
 }
@@ -58,18 +58,18 @@ class _MyHomePageState extends State<MyHomePage> {
             return new Builder(builder: (context) {
               return Dismissible(
                 background: Container(color: Colors.red),
-                key: Key(account.name),
+                key: Key(account.fullName),
                 onDismissed: (direction) {
                   setState(() {
                     savedAccounts.remove(account);
                   });
 
                   Scaffold.of(context).showSnackBar(
-                      SnackBar(content: Text("${account.name} removed")));
+                      SnackBar(content: Text("${account.fullName} removed")));
                 },
                 child: ListTile(
                   title: Text(
-                    account.name,
+                    account.fullName,
                     style: biggerFont,
                   ),
                 ),
@@ -99,70 +99,80 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
           leading: IconButton(icon: Icon(Icons.menu), onPressed: _pushSaved),
         ),
-        body: accounts.accounts.length > 0 ? RandomWords(
-          accounts: accounts,
-          savedAccounts: savedAccounts,
-        ) : Intro(),
+        body: accounts.accounts.length > 0
+            ? AccountsList(
+                accounts: accounts,
+                savedAccounts: savedAccounts,
+              )
+            : Intro(),
       );
     });
   }
 }
 
-class RandomWords extends StatefulWidget {
-  RandomWords({Key key, this.savedAccounts, this.accounts}) : super(key: key);
+class AccountsList extends StatefulWidget {
+  AccountsList({Key key, this.savedAccounts, this.accounts}) : super(key: key);
 
   final AccountsModel accounts;
   final List<Account> savedAccounts;
 
   @override
-  _RandomWordsState createState() => _RandomWordsState();
+  _AccountsListState createState() => _AccountsListState();
 }
 
-class _RandomWordsState extends State<RandomWords> {
-
+class _AccountsListState extends State<AccountsList> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<AccountsModel>(builder: (context, accounts, child) {
-      final tiles = accounts.accounts.map(
-              (Account account) {
-            final isSaved = widget.savedAccounts.contains(account);
+    final tiles = widget.accounts.accounts.map((Account account) {
+      final isSaved = widget.savedAccounts.contains(account);
 
-            return ListTile(
-              title: Text(
-                account.name,
-                style: biggerFont,
-              ),
-              trailing: Icon(
-                isSaved ? Icons.favorite : Icons.favorite_border,
-                color: isSaved ? Colors.red : null,
-              ),
-              onTap: () {
-                setState(() {
-                  if (isSaved) {
-                    widget.savedAccounts.remove(account);
-                  } else {
-                    widget.savedAccounts.add(account);
-                  }
-
-                  account.children?.forEach((child) {
-                    print(child.name);
-                  });
-                });
-              },
-            );
-          }
-      );
-
-      final divided = ListTile
-          .divideTiles(context: context, tiles: tiles)
-          .toList();
-
-      return Container(
-          child: ListView(
-            padding: EdgeInsets.all(16.0),
-            children: divided,
-          ),
+      return ListTile(
+        title: Text(
+          account.fullName,
+          style: biggerFont,
+        ),
+        trailing: Text(
+          NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
+        ),
+        leading: Icon(
+          isSaved ? Icons.favorite : Icons.favorite_border,
+          color: isSaved ? Colors.red : null,
+        ),
+        onTap: () {
+          setState(() {
+            if (isSaved) {
+              widget.savedAccounts.remove(account);
+            } else {
+              widget.savedAccounts.add(account);
+            }
+          });
+        },
       );
     });
+
+    final divided =
+        ListTile.divideTiles(context: context, tiles: tiles).toList();
+
+    return Container(
+      child: Center(
+        child: Column(
+          children: <Widget>[
+            ListView(
+              padding: EdgeInsets.all(16.0),
+              children: divided,
+              shrinkWrap: true,
+            ),
+            FlatButton(
+              color: Constants.darkAccent,
+              child: Text('Remove Accounts'),
+              onPressed: () =>
+                  Provider.of<AccountsModel>(context, listen: false)
+                      .removeAll(),
+              textColor: Constants.lightPrimary,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
