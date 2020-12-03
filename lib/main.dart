@@ -1,36 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
+import 'package:gnucash_mobile/providers/accounts.dart';
+import 'package:gnucash_mobile/widgets/intro.dart';
+import 'package:provider/provider.dart';
+import 'constants.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => AccountsModel()),
+    ],
+    child: MyApp(),
+  ));
+}
 
 const biggerFont = TextStyle(fontSize: 18.0);
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.amber,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: Scaffold(
-          body: MyHomePage(
-        title: 'Name Generator',
-      )),
-      // home: MyHomePage(title: 'Name Generator'),
+      debugShowCheckedModeBanner: false,
+      title: Constants.appName,
+      theme: Constants.lightTheme,
+      darkTheme: Constants.darkTheme,
+        home: MyHomePage(title: 'Accounts'),
     );
   }
 }
@@ -54,28 +48,28 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final savedSuggestions = <WordPair>[];
+  final savedAccounts = <Account>[];
 
   void _pushSaved() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (BuildContext context) {
-        final tiles = savedSuggestions.map(
-          (WordPair pair) {
+        final tiles = savedAccounts.map(
+          (Account account) {
             return new Builder(builder: (context) {
               return Dismissible(
                 background: Container(color: Colors.red),
-                key: Key(pair.asPascalCase),
+                key: Key(account.name),
                 onDismissed: (direction) {
                   setState(() {
-                    savedSuggestions.remove(pair);
+                    savedAccounts.remove(account);
                   });
 
-                  Scaffold.of(context)
-                      .showSnackBar(SnackBar(content: Text("${pair.asPascalCase} removed")));
+                  Scaffold.of(context).showSnackBar(
+                      SnackBar(content: Text("${account.name} removed")));
                 },
                 child: ListTile(
                   title: Text(
-                    pair.asPascalCase,
+                    account.name,
                     style: biggerFont,
                   ),
                 ),
@@ -90,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         return Scaffold(
             appBar: AppBar(
-              title: Text('Saved Suggestions'),
+              title: Text('Saved Accounts'),
             ),
             body: ListView(children: divided));
       }),
@@ -99,76 +93,76 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        leading: IconButton(icon: Icon(Icons.menu), onPressed: _pushSaved),
-      ),
-      body: RandomWords(savedSuggestions: savedSuggestions),
-    );
+    return Consumer<AccountsModel>(builder: (context, accounts, child) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          leading: IconButton(icon: Icon(Icons.menu), onPressed: _pushSaved),
+        ),
+        body: accounts.accounts.length > 0 ? RandomWords(
+          accounts: accounts,
+          savedAccounts: savedAccounts,
+        ) : Intro(),
+      );
+    });
   }
 }
 
 class RandomWords extends StatefulWidget {
-  RandomWords({Key key, this.savedSuggestions}) : super(key: key);
+  RandomWords({Key key, this.savedAccounts, this.accounts}) : super(key: key);
 
-  final List<WordPair> savedSuggestions;
+  final AccountsModel accounts;
+  final List<Account> savedAccounts;
 
   @override
   _RandomWordsState createState() => _RandomWordsState();
 }
 
 class _RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-
-  Widget _buildSuggestions() {
-    return ListView.builder(
-      padding: EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if (i.isOdd) return Divider();
-
-        final index = i ~/ 2;
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-
-        return _buildRow(_suggestions[index]);
-      },
-    );
-  }
-
-  Widget _buildRow(WordPair pair) {
-    final isSaved = widget.savedSuggestions.contains(pair);
-
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: biggerFont,
-      ),
-      trailing: Icon(
-        isSaved ? Icons.favorite : Icons.favorite_border,
-        color: isSaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (isSaved) {
-            widget.savedSuggestions.remove(pair);
-          } else {
-            widget.savedSuggestions.add(pair);
-          }
-        });
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return _buildSuggestions();
+    return Consumer<AccountsModel>(builder: (context, accounts, child) {
+      final tiles = accounts.accounts.map(
+              (Account account) {
+            final isSaved = widget.savedAccounts.contains(account);
+
+            return ListTile(
+              title: Text(
+                account.name,
+                style: biggerFont,
+              ),
+              trailing: Icon(
+                isSaved ? Icons.favorite : Icons.favorite_border,
+                color: isSaved ? Colors.red : null,
+              ),
+              onTap: () {
+                setState(() {
+                  if (isSaved) {
+                    widget.savedAccounts.remove(account);
+                  } else {
+                    widget.savedAccounts.add(account);
+                  }
+
+                  account.children?.forEach((child) {
+                    print(child.name);
+                  });
+                });
+              },
+            );
+          }
+      );
+
+      final divided = ListTile
+          .divideTiles(context: context, tiles: tiles)
+          .toList();
+
+      return Container(
+          child: ListView(
+            padding: EdgeInsets.all(16.0),
+            children: divided,
+          ),
+      );
+    });
   }
 }
