@@ -121,6 +121,51 @@ class AccountsList extends StatefulWidget {
 }
 
 class _AccountsListState extends State<AccountsList> {
+
+  void _viewAccount(account) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (BuildContext context) {
+        final tiles = account.children.map(
+              (Account childAccount) {
+                return ListTile(
+                  title: Text(
+                    account.name,
+                    style: biggerFont,
+                  ),
+                  trailing: account.balance == null ? Text("") : Text(
+                    NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
+                  ),
+                  onTap: () => _viewAccount(childAccount),
+                );
+              });
+
+        final divided = ListTile.divideTiles(
+          context: context,
+          tiles: tiles,
+        ).toList();
+
+        return Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: [
+                  Tab(icon: Icon(Icons.account_tree_sharp)),
+                  Tab(icon: Icon(Icons.account_balance_sharp)),
+                ],
+              ),
+              title: Text('Account'),
+            ),
+            body: TabBarView(
+              children: [
+                ListView(children: divided),
+                Icon(Icons.account_balance_sharp),
+              ],
+            ),
+            // body: ListView(children: divided));
+        );
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tiles = widget.accounts.accounts.map((Account account) {
@@ -128,25 +173,26 @@ class _AccountsListState extends State<AccountsList> {
 
       return ListTile(
         title: Text(
-          account.fullName,
+          account.name,
           style: biggerFont,
         ),
-        trailing: Text(
+        trailing: account.balance == null ? Text("") : Text(
           NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
         ),
         leading: Icon(
           isSaved ? Icons.favorite : Icons.favorite_border,
           color: isSaved ? Colors.red : null,
         ),
-        onTap: () {
-          setState(() {
-            if (isSaved) {
-              widget.savedAccounts.remove(account);
-            } else {
-              widget.savedAccounts.add(account);
-            }
-          });
-        },
+        onTap: () => _viewAccount(account),
+        // () {
+          // setState(() {
+          //   if (isSaved) {
+          //     widget.savedAccounts.remove(account);
+          //   } else {
+          //     widget.savedAccounts.add(account);
+          //   }
+          // });
+        // },
       );
     });
 

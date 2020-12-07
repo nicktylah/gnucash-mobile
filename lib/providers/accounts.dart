@@ -3,8 +3,8 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 
 class Account {
-  double balance;
-  List<Account> children;
+  double balance = 0.0; // non-standard
+  List<Account> children = []; // non-standard
   String code;
   String commodityM;
   String commodityN;
@@ -13,7 +13,8 @@ class Account {
   String fullName;
   bool hidden;
   String notes;
-  Account parent;
+  Account parent; // non-standard
+  String parentFullName; // non-standard
   bool placeholder; // Whether transactions can be placed in this account?
   bool tax;
   String type;
@@ -25,15 +26,38 @@ class Account {
   }
 
   Account.a(
-      double balance,
-      String fullName,
-      List<Account> children,
+    double balance,
+    String fullName,
+    List<Account> children,
     Account parent,
   ) {
     this.balance = balance;
     this.children = children;
     this.fullName = fullName;
     this.parent = parent;
+  }
+
+  Account.fromList(List<String> items) {
+    final trimmed = [];
+    for (var item in items) trimmed.add(item.trim());
+
+    this.type = trimmed[0];
+    this.fullName = trimmed[1];
+    this.name = trimmed[2];
+    this.code = trimmed[3];
+    this.description = trimmed[4];
+    this.color = trimmed[5];
+    this.notes = trimmed[6];
+    this.commodityM = trimmed[7];
+    this.commodityN = trimmed[8];
+    this.hidden = trimmed[9] == 'T' ? true : false;
+    this.tax = trimmed[10] == 'T' ? true : false;
+    this.placeholder = trimmed[11] == 'T' ? true : false;
+  }
+
+  @override
+  toString() {
+    return "Account{balance: ${this.balance}, children: List<Account>[${this.children.length}], code: ${this.code}, commodityM: ${this.commodityM}, commodityN: ${this.commodityN}, color: ${this.color}, description: ${this.description}, fullName: ${this.fullName}, hidden: ${this.hidden}, notes: ${this.notes}, parent: ${this.parent == null ? "null" : "Account(${this.parentFullName})"}, parentFullName: ${this.parentFullName}, placeholder: ${this.placeholder}, tax: ${this.tax}, type: ${this.type}, name: ${this.name}}";
   }
 }
 
@@ -51,41 +75,67 @@ class AccountsModel extends ChangeNotifier {
   UnmodifiableListView<Account> get recentDebitAccounts =>
       UnmodifiableListView(_recentDebitAccounts);
 
-  // Example CSV dump from GnuCash
-  // type,full_name,name,code,description,color,notes,commoditym,commodityn,hidden,tax,placeholder
-  // ASSET,Assets,Assets,,Assets,,,USD,CURRENCY,F,F,T
-  // ASSET,Assets:Current Assets,Current Assets,,Current Assets,,,USD,CURRENCY,F,F,T
-  // CASH,Assets:Current Assets:Cash in Wallet,Cash in Wallet,,Cash in Wallet,,,USD,CURRENCY,F,F,F
-  // ASSET,Assets:Current Assets:Joint Checking Account,Joint Checking Account,,Chase Checking Account w/ Hayla,,,USD,CURRENCY,F,F,F
-  // ASSET,Assets:Current Assets:Venmo,Venmo,,Venmo Balance,,,USD,CURRENCY,F,F,F
-  // ASSET,Assets:Current Assets:Wells Fargo Checking Account,Wells Fargo Checking Account,,Lame ol' duck,,,USD,CURRENCY,F,F,F
-  // BANK,Assets:Current Assets:Checking Account,Checking Account,,Checking Account,,,USD,CURRENCY,F,F,F
-  // BANK,Assets:Current Assets:Savings Account,Savings Account,,Savings Account,,,USD,CURRENCY,F,F,F
+  static List<Account> parseAccountCSV(String csv) {
+    final lines = csv.trim().split("\n");
 
-  // Test function to simulate adding bunch o' accounts
+    // Remove header row
+    lines.removeAt(0);
+    var _accounts = <Account>[];
+    for (var line in lines) {
+      final _account = Account.fromList(line.split(","));
+      final _lastIndex = _account.fullName.lastIndexOf(":");
+      final _hasParent = _lastIndex > 0;
+      var _parentFullName = '';
+      if (_hasParent) {
+        _parentFullName = _account.fullName.substring(0, _lastIndex);
+      }
+      _account.parentFullName = _parentFullName;
+
+      _accounts.add(_account);
+    }
+
+    return _buildAccountsTree(_accounts);
+  }
+
+  static List<Account> _buildAccountsTree(List<Account> accounts) {
+    final _lookup = Map<String, Account>();
+    final List<Account> _hierarchicalAccounts = [];
+
+    for (var _account in accounts) {
+      if (_lookup.containsKey(_account.parentFullName)) {
+        final _parent = _lookup[_account.parentFullName];
+        _account.parent = _parent;
+        _parent.children.add(_account);
+      } else {
+        _hierarchicalAccounts.add(_account);
+      }
+
+      _lookup[_account.fullName] = _account;
+    }
+
+    return _hierarchicalAccounts;
+  }
+
   void add(Account account) {
     _accounts.add(account);
     notifyListeners();
   }
 
+  // Test function to simulate adding bunch o' accounts
   void addAll() {
-    _accounts = [
-      Account.a(
-        40.0,
-        "Account 1",
-        [Account("Account 1.1"), Account("Account 1.2")],
-        null,
-      ),
-      Account("Account 2"),
-      Account("Account 3"),
-      Account("Account 4"),
-      Account("Account 5"),
-      Account("Account 6"),
-      Account("Account 7"),
-      Account("Account 8"),
-      Account("Account 9"),
-      Account("Account 10"),
-    ];
+    final exampleCSV = """
+  type,full_name,name,code,description,color,notes,commoditym,commodityn,hidden,tax,placeholder
+  ASSET,Assets,Assets,,Assets,,,USD,CURRENCY,F,F,T
+  ASSET,Assets:Current Assets,Current Assets,,Current Assets,,,USD,CURRENCY,F,F,T
+  CASH,Assets:Current Assets:Cash in Wallet,Cash in Wallet,,Cash in Wallet,,,USD,CURRENCY,F,F,F
+  ASSET,Assets:Current Assets:Joint Checking Account,Joint Checking Account,,Joint Checking Account,,,USD,CURRENCY,F,F,F
+  ASSET,Assets:Current Assets:Venmo,Venmo,,Venmo Balance,,,USD,CURRENCY,F,F,F
+  ASSET,Assets:Current Assets:Wells Fargo Checking Account,Wells Fargo Checking Account,,Lame ol' duck,,,USD,CURRENCY,F,F,F
+  BANK,Assets:Current Assets:Checking Account,Checking Account,,Checking Account,,,USD,CURRENCY,F,F,F
+  BANK,Assets:Current Assets:Savings Account,Savings Account,,Savings Account,,,USD,CURRENCY,F,F,F
+  """;
+    final _parsedAccounts = parseAccountCSV(exampleCSV);
+    _accounts = _parsedAccounts;
     notifyListeners();
   }
 
