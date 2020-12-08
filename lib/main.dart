@@ -122,70 +122,8 @@ class ParentAccountsList extends StatefulWidget {
 }
 
 class _ParentAccountsListState extends State<ParentAccountsList> {
-  void _viewAccount(account) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (BuildContext context) {
-        final tiles = account.children.map((Account childAccount) {
-          return ListTile(
-            title: Text(
-              account.name,
-              style: biggerFont,
-            ),
-            trailing: account.balance == null
-                ? Text("")
-                : Text(
-                    NumberFormat.simpleCurrency(decimalDigits: 2)
-                        .format(account.balance),
-                  ),
-            onTap: () => _viewAccount(childAccount),
-          );
-        });
-
-        final divided = ListTile.divideTiles(
-          context: context,
-          tiles: tiles,
-        ).toList();
-
-        return Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
-              tabs: [
-                Tab(icon: Icon(Icons.account_tree_sharp)),
-                Tab(icon: Icon(Icons.account_balance_sharp)),
-              ],
-            ),
-            title: Text('Account'),
-          ),
-          body: TabBarView(
-            children: [
-              ListView(children: divided),
-              Icon(Icons.account_balance_sharp),
-            ],
-          ),
-          // body: ListView(children: divided));
-        );
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // final tiles = widget.accounts.accounts.map((Account account) {
-    //   return ListTile(
-    //     title: Text(
-    //       account.name,
-    //       style: biggerFont,
-    //     ),
-    //     trailing: account.balance == null ? Text("") : Text(
-    //       NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
-    //     ),
-    //     onTap: () => _viewAccount(account),
-    //   );
-    // });
-
-    // final divided =
-    //     ListTile.divideTiles(context: context, tiles: tiles).toList();
-
     final builderTest = ListView.builder(
       itemCount: widget.accounts.accounts.length,
       itemBuilder: (context, index) {
@@ -195,7 +133,7 @@ class _ParentAccountsListState extends State<ParentAccountsList> {
             _account.name,
             style: biggerFont,
           ),
-          trailing: _account.balance == null
+          trailing: _account.placeholder
               ? null
               : Text(
                   NumberFormat.simpleCurrency(decimalDigits: 2)
@@ -220,11 +158,6 @@ class _ParentAccountsListState extends State<ParentAccountsList> {
         child: Column(
           children: <Widget>[
             builderTest,
-            // ListView(
-            //   padding: EdgeInsets.all(16.0),
-            //   children: divided,
-            //   shrinkWrap: true,
-            // ),
             FlatButton(
               color: Constants.darkAccent,
               child: Text('Remove Accounts'),
@@ -248,21 +181,35 @@ class AccountView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _builderTest = ListView.builder(
-      itemCount: this.account.children.length,
+      // itemCount: this.account.children.length,
       itemBuilder: (context, index) {
-        final _childAccount = this.account.children[index];
+        if (index.isOdd) {
+          return Divider();
+        }
+
+        final int i = index ~/ 2;
+        if (i >= this.account.children.length) {
+          return null;
+        }
+
+        final _childAccount = this.account.children[i];
         return ListTile(
           title: Text(
             _childAccount.name,
             style: biggerFont,
           ),
-          trailing: _childAccount.balance == null
+          trailing: _childAccount.placeholder
               ? null
               : Text(
                   NumberFormat.simpleCurrency(decimalDigits: 2)
                       .format(_childAccount.balance),
                 ),
           onTap: () {
+            if (_childAccount.children.length == 0) {
+              // Take them to Transactions view here
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -276,26 +223,35 @@ class AccountView extends StatelessWidget {
       shrinkWrap: true,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        bottom: this.account.placeholder
-            ? null
-            : TabBar(
-                tabs: [
-                  Tab(icon: Icon(Icons.account_tree_sharp)),
-                  Tab(icon: Icon(Icons.account_balance_sharp)),
-                ],
-              ),
-        title: Text(this.account.fullName),
+    // Simpler view if this account cannot hold transactions
+    if (this.account.placeholder) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(this.account.fullName),
+        ),
+        body: _builderTest,
+      );
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.account_tree_sharp)),
+              Tab(icon: Icon(Icons.account_balance_sharp)),
+            ],
+          ),
+          title: Text(this.account.fullName),
+        ),
+        body: TabBarView(
+          children: [
+            _builderTest,
+            Icon(Icons.account_balance_sharp),
+          ],
+        ),
       ),
-      body: this.account.placeholder
-          ? _builderTest
-          : TabBarView(
-              children: [
-                _builderTest,
-                Icon(Icons.account_balance_sharp),
-              ],
-            ),
     );
   }
 }
