@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
           leading: IconButton(icon: Icon(Icons.menu), onPressed: _pushSaved),
         ),
         body: accounts.accounts.length > 0
-            ? AccountsList(
+            ? ParentAccountsList(
                 accounts: accounts,
                 savedAccounts: savedAccounts,
               )
@@ -110,34 +110,36 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class AccountsList extends StatefulWidget {
-  AccountsList({Key key, this.savedAccounts, this.accounts}) : super(key: key);
+class ParentAccountsList extends StatefulWidget {
+  ParentAccountsList({Key key, this.savedAccounts, this.accounts})
+      : super(key: key);
 
   final AccountsModel accounts;
   final List<Account> savedAccounts;
 
   @override
-  _AccountsListState createState() => _AccountsListState();
+  _ParentAccountsListState createState() => _ParentAccountsListState();
 }
 
-class _AccountsListState extends State<AccountsList> {
-
+class _ParentAccountsListState extends State<ParentAccountsList> {
   void _viewAccount(account) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (BuildContext context) {
-        final tiles = account.children.map(
-              (Account childAccount) {
-                return ListTile(
-                  title: Text(
-                    account.name,
-                    style: biggerFont,
+        final tiles = account.children.map((Account childAccount) {
+          return ListTile(
+            title: Text(
+              account.name,
+              style: biggerFont,
+            ),
+            trailing: account.balance == null
+                ? Text("")
+                : Text(
+                    NumberFormat.simpleCurrency(decimalDigits: 2)
+                        .format(account.balance),
                   ),
-                  trailing: account.balance == null ? Text("") : Text(
-                    NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
-                  ),
-                  onTap: () => _viewAccount(childAccount),
-                );
-              });
+            onTap: () => _viewAccount(childAccount),
+          );
+        });
 
         final divided = ListTile.divideTiles(
           context: context,
@@ -145,22 +147,22 @@ class _AccountsListState extends State<AccountsList> {
         ).toList();
 
         return Scaffold(
-            appBar: AppBar(
-              bottom: TabBar(
-                tabs: [
-                  Tab(icon: Icon(Icons.account_tree_sharp)),
-                  Tab(icon: Icon(Icons.account_balance_sharp)),
-                ],
-              ),
-              title: Text('Account'),
-            ),
-            body: TabBarView(
-              children: [
-                ListView(children: divided),
-                Icon(Icons.account_balance_sharp),
+          appBar: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.account_tree_sharp)),
+                Tab(icon: Icon(Icons.account_balance_sharp)),
               ],
             ),
-            // body: ListView(children: divided));
+            title: Text('Account'),
+          ),
+          body: TabBarView(
+            children: [
+              ListView(children: divided),
+              Icon(Icons.account_balance_sharp),
+            ],
+          ),
+          // body: ListView(children: divided));
         );
       }),
     );
@@ -168,46 +170,61 @@ class _AccountsListState extends State<AccountsList> {
 
   @override
   Widget build(BuildContext context) {
-    final tiles = widget.accounts.accounts.map((Account account) {
-      final isSaved = widget.savedAccounts.contains(account);
+    // final tiles = widget.accounts.accounts.map((Account account) {
+    //   return ListTile(
+    //     title: Text(
+    //       account.name,
+    //       style: biggerFont,
+    //     ),
+    //     trailing: account.balance == null ? Text("") : Text(
+    //       NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
+    //     ),
+    //     onTap: () => _viewAccount(account),
+    //   );
+    // });
 
-      return ListTile(
-        title: Text(
-          account.name,
-          style: biggerFont,
-        ),
-        trailing: account.balance == null ? Text("") : Text(
-          NumberFormat.simpleCurrency(decimalDigits: 2).format(account.balance),
-        ),
-        leading: Icon(
-          isSaved ? Icons.favorite : Icons.favorite_border,
-          color: isSaved ? Colors.red : null,
-        ),
-        onTap: () => _viewAccount(account),
-        // () {
-          // setState(() {
-          //   if (isSaved) {
-          //     widget.savedAccounts.remove(account);
-          //   } else {
-          //     widget.savedAccounts.add(account);
-          //   }
-          // });
-        // },
-      );
-    });
+    // final divided =
+    //     ListTile.divideTiles(context: context, tiles: tiles).toList();
 
-    final divided =
-        ListTile.divideTiles(context: context, tiles: tiles).toList();
+    final builderTest = ListView.builder(
+      itemCount: widget.accounts.accounts.length,
+      itemBuilder: (context, index) {
+        final _account = widget.accounts.accounts[index];
+        return ListTile(
+          title: Text(
+            _account.name,
+            style: biggerFont,
+          ),
+          trailing: _account.balance == null
+              ? null
+              : Text(
+                  NumberFormat.simpleCurrency(decimalDigits: 2)
+                      .format(_account.balance),
+                ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AccountView(account: _account),
+              ),
+            );
+          },
+        );
+      },
+      padding: EdgeInsets.all(16.0),
+      shrinkWrap: true,
+    );
 
     return Container(
       child: Center(
         child: Column(
           children: <Widget>[
-            ListView(
-              padding: EdgeInsets.all(16.0),
-              children: divided,
-              shrinkWrap: true,
-            ),
+            builderTest,
+            // ListView(
+            //   padding: EdgeInsets.all(16.0),
+            //   children: divided,
+            //   shrinkWrap: true,
+            // ),
             FlatButton(
               color: Constants.darkAccent,
               child: Text('Remove Accounts'),
@@ -219,6 +236,66 @@ class _AccountsListState extends State<AccountsList> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class AccountView extends StatelessWidget {
+  final Account account;
+
+  AccountView({Key key, @required this.account}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _builderTest = ListView.builder(
+      itemCount: this.account.children.length,
+      itemBuilder: (context, index) {
+        final _childAccount = this.account.children[index];
+        return ListTile(
+          title: Text(
+            _childAccount.name,
+            style: biggerFont,
+          ),
+          trailing: _childAccount.balance == null
+              ? null
+              : Text(
+                  NumberFormat.simpleCurrency(decimalDigits: 2)
+                      .format(_childAccount.balance),
+                ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AccountView(account: _childAccount),
+              ),
+            );
+          },
+        );
+      },
+      padding: EdgeInsets.all(16.0),
+      shrinkWrap: true,
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        bottom: this.account.placeholder
+            ? null
+            : TabBar(
+                tabs: [
+                  Tab(icon: Icon(Icons.account_tree_sharp)),
+                  Tab(icon: Icon(Icons.account_balance_sharp)),
+                ],
+              ),
+        title: Text(this.account.fullName),
+      ),
+      body: this.account.placeholder
+          ? _builderTest
+          : TabBarView(
+              children: [
+                _builderTest,
+                Icon(Icons.account_balance_sharp),
+              ],
+            ),
     );
   }
 }
