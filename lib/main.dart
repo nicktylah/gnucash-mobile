@@ -124,7 +124,7 @@ class ParentAccountsList extends StatefulWidget {
 class _ParentAccountsListState extends State<ParentAccountsList> {
   @override
   Widget build(BuildContext context) {
-    final builderTest = ListView.builder(
+    final _builder = ListView.builder(
       itemCount: widget.accounts.accounts.length,
       itemBuilder: (context, index) {
         final _account = widget.accounts.accounts[index];
@@ -153,11 +153,11 @@ class _ParentAccountsListState extends State<ParentAccountsList> {
       shrinkWrap: true,
     );
 
-    return Container(
-      child: Center(
+    return Scaffold(
+      body: Center(
         child: Column(
           children: <Widget>[
-            builderTest,
+            _builder,
             FlatButton(
               color: Constants.darkAccent,
               child: Text('Remove Accounts'),
@@ -168,6 +168,12 @@ class _ParentAccountsListState extends State<ParentAccountsList> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Constants.darkBG,
+        child: Icon(Icons.add),
+        onPressed: () =>
+            {Scaffold.of(context).showSnackBar(SnackBar(content: Text("You tapped the button!")))},
       ),
     );
   }
@@ -180,7 +186,7 @@ class AccountView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _builderTest = ListView.builder(
+    final _builder = ListView.builder(
       // itemCount: this.account.children.length,
       itemBuilder: (context, index) {
         if (index.isOdd) {
@@ -229,7 +235,7 @@ class AccountView extends StatelessWidget {
         appBar: AppBar(
           title: Text(this.account.fullName),
         ),
-        body: _builderTest,
+        body: _builder,
       );
     }
 
