@@ -3,6 +3,7 @@ import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
+import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
 
@@ -45,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (BuildContext context) {
         final tiles = savedAccounts.map(
-          (Account account) {
+              (Account account) {
             return new Builder(builder: (context) {
               return Dismissible(
                 background: Container(color: Colors.red),
@@ -85,31 +86,47 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
+      final _hasImported = accounts.accounts.length > 0;
+
       return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: accounts.accounts.length > 0
+        body: _hasImported
             ? ListOfAccounts(accounts: accounts.accounts)
             : Intro(),
         drawer: Drawer(
             child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Constants.darkBG,
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Constants.darkBG,
+                  ),
+                ),
+                ListTile(
+                    title: Text('Delete Accounts'),
+                    onTap: () {
+                      Provider.of<AccountsModel>(context, listen: false)
+                          .removeAll();
+                      Navigator.pop(context);
+                    }),
+              ],
+            )),
+        floatingActionButton: _hasImported
+            ? FloatingActionButton(
+          backgroundColor: Constants.darkBG,
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TransactionForm(),
               ),
-            ),
-            ListTile(
-                title: Text('Delete Accounts'),
-                onTap: () {
-                  Provider.of<AccountsModel>(context, listen: false)
-                      .removeAll();
-                  Navigator.pop(context);
-                }),
-          ],
-        )),
+            );
+          },
+        )
+            : null,
       );
     });
   }

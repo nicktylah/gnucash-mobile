@@ -31,6 +31,7 @@ dependencies:
   provider: ^3.2.0
   intl: ^0.16.1
   csv: ^4.1.0
+  input_calculator: ^1.1.0+5
 
 dev_dependencies:
   flutter_test:

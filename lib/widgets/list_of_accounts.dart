@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
+import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
 import 'package:intl/intl.dart';
 
@@ -8,12 +9,11 @@ import 'account_view.dart';
 
 class ListOfAccounts extends StatelessWidget {
   final List<Account> accounts;
-  
+
   ListOfAccounts({Key key, @required this.accounts}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
-
     final _accountsBuilder = ListView.builder(
       itemBuilder: (context, index) {
         if (index.isOdd) {
@@ -35,9 +35,9 @@ class ListOfAccounts extends StatelessWidget {
           trailing: _account.placeholder
               ? null
               : Text(
-            NumberFormat.simpleCurrency(decimalDigits: 2)
-                .format(_account.balance),
-          ),
+                  NumberFormat.simpleCurrency(decimalDigits: 2)
+                      .format(_account.balance),
+                ),
           onTap: () {
             if (_account.children.length == 0) {
               Navigator.push(
@@ -82,5 +82,21 @@ class ListOfAccounts extends StatelessWidget {
     return Container(
       child: _accountsBuilder,
     );
+
+    // return Scaffold(
+    //   body: _accountsBuilder,
+    //   floatingActionButton: FloatingActionButton(
+    //     backgroundColor: Constants.darkBG,
+    //     child: Icon(Icons.add),
+    //     onPressed: () {
+    //       Navigator.push(
+    //         context,
+    //         MaterialPageRoute(
+    //           builder: (context) => TransactionForm(),
+    //         ),
+    //       );
+    //     },
+    //   ),
+    // );
   }
 }
