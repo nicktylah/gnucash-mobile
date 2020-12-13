@@ -10,6 +10,8 @@ class Constants {
   static Color lightBG = Color(0xfff3f4f9);
   static Color darkBG = Color(0xff2B2B2B);
 
+  static TextStyle biggerFont = TextStyle(fontSize: 18.0);
+
   static ThemeData lightTheme = ThemeData(
     backgroundColor: lightBG,
     primaryColor: lightPrimary,

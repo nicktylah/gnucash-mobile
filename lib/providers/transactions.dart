@@ -68,8 +68,50 @@ class Transaction {
 }
 
 class TransactionsModel extends ChangeNotifier {
+  final _fakeTransactions = [
+
+  ];
+
   List<Transaction> _transactions = [];
-  Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
+  // Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
+  Map<String, List<Transaction>> _transactionsByAccountFullName = {
+    "Expenses:Food:Delivery": [Transaction.fromList([
+      DateTime.now().toString(),
+      "1",
+      "1",
+      "Test description",
+      "Test notes",
+      "USD",
+      "",
+      "Test action",
+      "Test memo",
+      "Expenses:Food",
+      "Food",
+      "\$10",
+      "10",
+      "n",
+      DateTime.now().toString(),
+      "2",
+    ])],
+    "Expenses:Food": [Transaction.fromList([
+      DateTime.now().toString(),
+      "2",
+      "2",
+      "Test description",
+      "Test notes",
+      "USD",
+      "",
+      "Test action",
+      "Test memo",
+      "Expenses:Food",
+      "Food",
+      "\$12",
+      "12",
+      "n",
+      DateTime.now().toString(),
+      "3",
+    ])]
+  };
 
   UnmodifiableListView<Transaction> get transactions => UnmodifiableListView(_transactions);
   UnmodifiableMapView<String, List<Transaction>> get transactionsByAccountFullName => UnmodifiableMapView(_transactionsByAccountFullName);
