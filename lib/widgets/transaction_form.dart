@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
+import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:input_calculator/input_calculator.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
 
 class TransactionForm extends StatefulWidget {
+  final Account toAccount;
+
+  TransactionForm({Key key, this.toAccount}) : super(key: key);
   @override
+
   _TransactionFormState createState() => _TransactionFormState();
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-  FocusNode amountFocusNode;
 
   @override
   void initState() {
     super.initState();
-
-    amountFocusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    amountFocusNode.dispose();
-
-    super.dispose();
   }
 
   final _key = GlobalKey<FormState>();
+  final _dateInputController = TextEditingController();
+  final _transactions = [Transaction(), Transaction()];
 
   @override
   Widget build(BuildContext context) {
+    _dateInputController.text = DateFormat.yMd().format(DateTime.now());
+
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
@@ -57,7 +56,13 @@ class _TransactionFormState extends State<TransactionForm> {
                 ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 onSaved: (value) {
-                  print("Saved $value");
+                  final _parsed = double.parse(value);
+                  _transactions[0].amount = _parsed;
+                  _transactions[0].amountWithSymbol = NumberFormat.simpleCurrency(decimalDigits: 2)
+                      .format(_parsed);
+                  _transactions[1].amount = -_parsed;
+                  _transactions[1].amountWithSymbol = NumberFormat.simpleCurrency(decimalDigits: 2)
+                      .format(-_parsed);
                 },
                 validator: (value) {
                   if (value.isEmpty || double.tryParse(value) == null) {
@@ -72,7 +77,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   hintText: 'Description',
                 ),
                 onSaved: (value) {
-                  print("Saved $value");
+                  _transactions[0].description = value;
                 },
                 validator: (value) {
                   if (value.isEmpty) {
@@ -81,43 +86,119 @@ class _TransactionFormState extends State<TransactionForm> {
                   return null;
                 },
               ),
-              Padding(
-                // padding: const EdgeInsets.all(16.0),
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                // child: ElevatedButton(
-                //   onPressed: () {
-                //     // Validate will return true if the form is valid, or false if
-                //     // the form is invalid.
-                //     if (_key.currentState.validate()) {
-                //       // Process data.
-                //       _key.currentState.save();
-                //       print(_key.currentState.toString());
-                //     } else {
-                //       print("invalid form");
-                //     }
-                //   },
-                //   child: Text('Save'),
-                // ),
+              DropdownButtonFormField<Account>(
+                decoration: const InputDecoration(
+                  hintText: 'To Account',
+                ),
+                // TODO: Put recently used first
+                items: accounts.accounts.sublist(0,4).map((account) {
+                  return DropdownMenuItem(
+                    value: account,
+                    child: Text(account.fullName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                },
+                onSaved: (value) {
+                  _transactions[0].fullAccountName = value.fullName;
+                  _transactions[0].accountName = value.name;
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please enter a valid account to transfer to';
+                  }
+                  return null;
+                },
+                value: widget.toAccount, // TODO: prepopulate if possible, use favorite if set
+              ),
+              DropdownButtonFormField<Account>(
+                decoration: const InputDecoration(
+                  hintText: 'From Account',
+                ),
+                // TODO: put recently used first
+                items: accounts.accounts.sublist(0,4).map((account) {
+                  return DropdownMenuItem(
+                    value: account,
+                    child: Text(account.fullName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                },
+                onSaved: (value) {
+                  _transactions[1].fullAccountName = value.fullName;
+                  _transactions[1].accountName = value.name;
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please enter a valid account to transfer to';
+                  }
+                  return null;
+                },
+                // value: 'TODO: prepopulate if possible, use favorite if set'
+              ),
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Date',
+                ),
+                controller: _dateInputController,
+                onSaved: (value) {
+                  _transactions[0].date = DateFormat('yyyy-MM-dd').format(DateFormat.yMd().parse(value));
+                },
+                onTap: () async {
+                  final _now = DateTime.now();
+                  final _date = await showDatePicker(
+                    context: context,
+                    initialDate: _now,
+                    firstDate: DateTime(_now.year - 10),
+                    lastDate: DateTime(_now.year + 10),
+                  );
+
+                  _dateInputController.text = DateFormat.yMd().format(_date);
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please enter a valid date';
+                  }
+                  try {
+                    DateFormat.yMd().parse(value);
+                  } catch (FormatException) {
+                    return 'Please enter a valid date';
+                  }
+
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Notes',
+                ),
+                onSaved: (value) {
+                  _transactions[0].notes = value;
+                },
               ),
             ],
           ),
           key: _key,
         ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Constants.darkBG,
-          child: Icon(Icons.save_sharp),
-          onPressed: () {
-            // Validate will return true if the form is valid, or false if
-            // the form is invalid.
-            if (_key.currentState.validate()) {
-              // Process data.
-              _key.currentState.save();
-              print(_key.currentState.toString());
-            } else {
-              print("invalid form");
-            }
-          },
-        ),
+        floatingActionButton:
+        // Builder(builder: (context) {
+          FloatingActionButton(
+            backgroundColor: Constants.darkBG,
+            child: Icon(Icons.save_sharp),
+            onPressed: () {
+              // Validate will return true if the form is valid, or false if
+              // the form is invalid.
+              if (_key.currentState.validate()) {
+                // Process data.
+                _key.currentState.save();
+                Provider.of<TransactionsModel>(context, listen: false).addAll(_transactions);
+                print(Provider.of<TransactionsModel>(context, listen: false).transactions);
+                Navigator.pop(context, true);
+              } else {
+                print("invalid form");
+              }
+            },
+          ),
       );
     });
   }

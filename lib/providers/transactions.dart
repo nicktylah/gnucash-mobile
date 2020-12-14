@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 
 class Transaction {
-  DateTime date;
+  String date;
   String id;
   int number;
   String description;
@@ -16,7 +16,7 @@ class Transaction {
   String accountName;
   String amountWithSymbol;
   double amount;
-  bool reconcile;
+  bool reconcile = false;
   DateTime reconcileDate;
   int ratePrice;
 
@@ -24,7 +24,7 @@ class Transaction {
     final trimmed = [];
     for (var item in items) trimmed.add(item.trim());
 
-    this.date = DateTime.parse(trimmed[0]);
+    this.date = trimmed[0];
     this.id = trimmed[1];
     this.number = int.parse(trimmed[2]);
     this.description = trimmed[3];
@@ -42,28 +42,11 @@ class Transaction {
     this.ratePrice = int.parse(trimmed[15]);
   }
 
+  Transaction();
+
   @override
   toString() {
-    return """
-    Transaction{
-      date: ${this.date},
-      id: ${this.id},
-      number: ${this.number},
-      description: ${this.description},
-      notes: ${this.notes},
-      commodityCurrency: ${this.commodityCurrency},
-      voidReason: ${this.voidReason},
-      action: ${this.action},
-      memo: ${this.memo},
-      fullAccountName: ${this.fullAccountName},
-      accountName: ${this.accountName},
-      amountWithSymbol: ${this.amountWithSymbol},
-      amount: ${this.amount},
-      reconcile: ${this.reconcile},
-      reconcileDate: ${this.reconcileDate},
-      ratePrice: ${this.ratePrice},
-    }
-    """;
+    return """Transaction{date: ${this.date}, id: ${this.id}, number: ${this.number}, description: ${this.description}, notes: ${this.notes}, commodityCurrency: ${this.commodityCurrency}, voidReason: ${this.voidReason}, action: ${this.action}, memo: ${this.memo}, fullAccountName: ${this.fullAccountName}, accountName: ${this.accountName}, amountWithSymbol: ${this.amountWithSymbol}, amount: ${this.amount}, reconcile: ${this.reconcile}, reconcileDate: ${this.reconcileDate}, ratePrice: ${this.ratePrice}}""";
   }
 }
 
@@ -118,6 +101,11 @@ class TransactionsModel extends ChangeNotifier {
 
   void add(Transaction transaction) {
     _transactions.add(transaction);
+    notifyListeners();
+  }
+
+  void addAll(List<Transaction> transactions) {
+    _transactions.addAll(transactions);
     notifyListeners();
   }
 

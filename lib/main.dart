@@ -46,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (BuildContext context) {
         final tiles = savedAccounts.map(
-              (Account account) {
+          (Account account) {
             return new Builder(builder: (context) {
               return Dismissible(
                 background: Container(color: Colors.red),
@@ -97,35 +97,42 @@ class _MyHomePageState extends State<MyHomePage> {
             : Intro(),
         drawer: Drawer(
             child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Constants.darkBG,
-                  ),
-                ),
-                ListTile(
-                    title: Text('Delete Accounts'),
-                    onTap: () {
-                      Provider.of<AccountsModel>(context, listen: false)
-                          .removeAll();
-                      Navigator.pop(context);
-                    }),
-              ],
-            )),
-        floatingActionButton: _hasImported
-            ? FloatingActionButton(
-          backgroundColor: Constants.darkBG,
-          child: Icon(Icons.add),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TransactionForm(),
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Constants.darkBG,
               ),
-            );
-          },
-        )
+            ),
+            ListTile(
+                title: Text('Delete Accounts'),
+                onTap: () {
+                  Provider.of<AccountsModel>(context, listen: false)
+                      .removeAll();
+                  Navigator.pop(context);
+                }),
+          ],
+        )),
+        floatingActionButton: _hasImported
+            ? Builder(builder: (context) {
+                return FloatingActionButton(
+                  backgroundColor: Constants.darkBG,
+                  child: Icon(Icons.add),
+                  onPressed: () async {
+                    final _success = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TransactionForm(),
+                      ),
+                    );
+
+                    if (_success) {
+                      Scaffold.of(context).showSnackBar(
+                          SnackBar(content: Text("Transaction created!")));
+                    }
+                  },
+                );
+              })
             : null,
       );
     });
