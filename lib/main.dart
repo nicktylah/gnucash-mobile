@@ -1,6 +1,8 @@
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
+import 'package:gnucash_mobile/widgets/export.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
@@ -56,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     savedAccounts.remove(account);
                   });
 
-                  Scaffold.of(context).showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("${account.fullName} removed")));
                 },
                 child: ListTile(
@@ -105,6 +107,59 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ListTile(
+                title: Text('Import Accounts'),
+                onTap: () {
+                  if (_hasImported) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "Accounts already imported. Please remove them first."),
+                    ));
+                  } else {
+                    Provider.of<AccountsModel>(context, listen: false).addAll();
+                  }
+                  Navigator.pop(context);
+                }),
+            ListTile(
+                title: Text('Export'),
+                onTap: () async {
+                  // TODO: Go to export screen with at least a "delete after export" checkbox
+                  final _success = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Export(),
+                    ),
+                  );
+
+                  if (_success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Transactions exported!")));
+                  }
+
+                  // final _transactionsList =
+                  //     Provider.of<TransactionsModel>(context, listen: false)
+                  //         .transactions
+                  //         .map((_transaction) => _transaction.toList())
+                  //         .toList();
+                  // final _csvString =
+                  //     const ListToCsvConverter().convert(_transactionsList);
+                  // print(_csvString);
+                  //
+                  // // Should things be deleted if export is successful?
+                  //
+                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  //   content: Text("You're trying to export stuff!"),
+                  // ));
+                  // Navigator.pop(context);
+                }),
+            ListTile(
+                title: Text('Favorites'),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("You're trying to set some favorites!"),
+                  ));
+                  Navigator.pop(context);
+                }),
+            ListTile(
                 title: Text('Delete Accounts'),
                 onTap: () {
                   Provider.of<AccountsModel>(context, listen: false)
@@ -127,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
 
                     if (_success) {
-                      Scaffold.of(context).showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Transaction created!")));
                     }
                   },

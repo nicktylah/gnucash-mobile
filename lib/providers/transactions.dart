@@ -17,7 +17,7 @@ class Transaction {
   String amountWithSymbol;
   double amount;
   bool reconcile = false;
-  DateTime reconcileDate;
+  String reconcileDate;
   int ratePrice;
 
   Transaction.fromList(List<dynamic> items) {
@@ -38,7 +38,7 @@ class Transaction {
     this.amountWithSymbol = trimmed[11];
     this.amount = double.parse(trimmed[12]);
     this.reconcile = trimmed[13] == 'n' ? false : true;
-    this.reconcileDate = DateTime.parse(trimmed[14]);
+    this.reconcileDate = trimmed[14];
     this.ratePrice = int.parse(trimmed[15]);
   }
 
@@ -47,6 +47,27 @@ class Transaction {
   @override
   toString() {
     return """Transaction{date: ${this.date}, id: ${this.id}, number: ${this.number}, description: ${this.description}, notes: ${this.notes}, commodityCurrency: ${this.commodityCurrency}, voidReason: ${this.voidReason}, action: ${this.action}, memo: ${this.memo}, fullAccountName: ${this.fullAccountName}, accountName: ${this.accountName}, amountWithSymbol: ${this.amountWithSymbol}, amount: ${this.amount}, reconcile: ${this.reconcile}, reconcileDate: ${this.reconcileDate}, ratePrice: ${this.ratePrice}}""";
+  }
+
+  List<dynamic> toList() {
+    return [
+      this.date ?? "",
+      this.id ?? "",
+      this.number ?? "",
+      this.description ?? "",
+      this.notes ?? "",
+      this.commodityCurrency ?? "",
+      this.voidReason ?? "",
+      this.action ?? "",
+      this.memo ?? "",
+      this.fullAccountName ?? "",
+      this.accountName ?? "",
+      this.amountWithSymbol ?? "",
+      this.amount ?? "",
+      this.reconcile ? "n" : "",
+      this.reconcileDate ?? "",
+      this.ratePrice ?? ""
+    ];
   }
 }
 

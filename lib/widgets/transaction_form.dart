@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
-import 'package:input_calculator/input_calculator.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -13,12 +12,10 @@ class TransactionForm extends StatefulWidget {
 
   TransactionForm({Key key, this.toAccount}) : super(key: key);
   @override
-
   _TransactionFormState createState() => _TransactionFormState();
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-
   @override
   void initState() {
     super.initState();
@@ -26,6 +23,7 @@ class _TransactionFormState extends State<TransactionForm> {
 
   final _key = GlobalKey<FormState>();
   final _dateInputController = TextEditingController();
+  // Credit account, debit account
   final _transactions = [Transaction(), Transaction()];
 
   @override
@@ -58,11 +56,13 @@ class _TransactionFormState extends State<TransactionForm> {
                 onSaved: (value) {
                   final _parsed = double.parse(value);
                   _transactions[0].amount = _parsed;
-                  _transactions[0].amountWithSymbol = NumberFormat.simpleCurrency(decimalDigits: 2)
-                      .format(_parsed);
+                  _transactions[0].amountWithSymbol =
+                      NumberFormat.simpleCurrency(decimalDigits: 2)
+                          .format(_parsed);
                   _transactions[1].amount = -_parsed;
-                  _transactions[1].amountWithSymbol = NumberFormat.simpleCurrency(decimalDigits: 2)
-                      .format(-_parsed);
+                  _transactions[1].amountWithSymbol =
+                      NumberFormat.simpleCurrency(decimalDigits: 2)
+                          .format(-_parsed);
                 },
                 validator: (value) {
                   if (value.isEmpty || double.tryParse(value) == null) {
@@ -88,53 +88,59 @@ class _TransactionFormState extends State<TransactionForm> {
               ),
               DropdownButtonFormField<Account>(
                 decoration: const InputDecoration(
-                  hintText: 'To Account',
+                  hintText: 'Credit Account',
                 ),
+                isExpanded: true,
                 // TODO: Put recently used first
-                items: accounts.accounts.sublist(0,4).map((account) {
+                items: accounts.validTransactionAccounts.map((account) {
                   return DropdownMenuItem(
                     value: account,
-                    child: Text(account.fullName),
+                    child: Text(
+                      account.fullName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   );
                 }).toList(),
-                onChanged: (value) {
-                },
+                onChanged: (value) {},
                 onSaved: (value) {
                   _transactions[0].fullAccountName = value.fullName;
                   _transactions[0].accountName = value.name;
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please enter a valid account to transfer to';
+                    return 'Please enter a valid account to credit.';
                   }
                   return null;
                 },
-                value: widget.toAccount, // TODO: prepopulate if possible, use favorite if set
+                value: widget.toAccount == null
+                    ? accounts.favoriteCreditAccount
+                    : widget
+                        .toAccount,
               ),
               DropdownButtonFormField<Account>(
                 decoration: const InputDecoration(
-                  hintText: 'From Account',
+                  hintText: 'Debit Account',
                 ),
+                isExpanded: true,
                 // TODO: put recently used first
-                items: accounts.accounts.sublist(0,4).map((account) {
+                items: accounts.validTransactionAccounts.map((account) {
                   return DropdownMenuItem(
                     value: account,
                     child: Text(account.fullName),
                   );
                 }).toList(),
-                onChanged: (value) {
-                },
+                onChanged: (value) {},
                 onSaved: (value) {
                   _transactions[1].fullAccountName = value.fullName;
                   _transactions[1].accountName = value.name;
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please enter a valid account to transfer to';
+                    return 'Please enter a valid account to debit';
                   }
                   return null;
                 },
-                // value: 'TODO: prepopulate if possible, use favorite if set'
+                value: accounts.favoriteDebitAccount,
               ),
               TextFormField(
                 decoration: const InputDecoration(
@@ -142,7 +148,8 @@ class _TransactionFormState extends State<TransactionForm> {
                 ),
                 controller: _dateInputController,
                 onSaved: (value) {
-                  _transactions[0].date = DateFormat('yyyy-MM-dd').format(DateFormat.yMd().parse(value));
+                  _transactions[0].date = DateFormat('yyyy-MM-dd')
+                      .format(DateFormat.yMd().parse(value));
                 },
                 onTap: () async {
                   final _now = DateTime.now();
@@ -181,24 +188,26 @@ class _TransactionFormState extends State<TransactionForm> {
           key: _key,
         ),
         floatingActionButton:
-        // Builder(builder: (context) {
-          FloatingActionButton(
-            backgroundColor: Constants.darkBG,
-            child: Icon(Icons.save_sharp),
-            onPressed: () {
-              // Validate will return true if the form is valid, or false if
-              // the form is invalid.
-              if (_key.currentState.validate()) {
-                // Process data.
-                _key.currentState.save();
-                Provider.of<TransactionsModel>(context, listen: false).addAll(_transactions);
-                print(Provider.of<TransactionsModel>(context, listen: false).transactions);
-                Navigator.pop(context, true);
-              } else {
-                print("invalid form");
-              }
-            },
-          ),
+            // Builder(builder: (context) {
+            FloatingActionButton(
+          backgroundColor: Constants.darkBG,
+          child: Icon(Icons.save_sharp),
+          onPressed: () {
+            // Validate will return true if the form is valid, or false if
+            // the form is invalid.
+            if (_key.currentState.validate()) {
+              // Process data.
+              _key.currentState.save();
+              Provider.of<TransactionsModel>(context, listen: false)
+                  .addAll(_transactions);
+              print(Provider.of<TransactionsModel>(context, listen: false)
+                  .transactions);
+              Navigator.pop(context, true);
+            } else {
+              print("invalid form");
+            }
+          },
+        ),
       );
     });
   }

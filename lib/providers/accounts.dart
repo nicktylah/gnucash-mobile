@@ -66,20 +66,22 @@ class Account {
 
 class AccountsModel extends ChangeNotifier {
   List<Account> _accounts = [];
+  List<Account> _validTransactionAccounts = [];
 
-  final Account _favoriteCreditAccount = null;
-  final Account _favoriteDebitAccount = null;
+  Account favoriteCreditAccount;
+  Account favoriteDebitAccount;
   final List<Account> _recentCreditAccounts = [];
   final List<Account> _recentDebitAccounts = [];
 
   UnmodifiableListView<Account> get accounts => UnmodifiableListView(_accounts);
+  UnmodifiableListView<Account> get validTransactionAccounts => UnmodifiableListView(_validTransactionAccounts);
+
   UnmodifiableListView<Account> get recentCreditAccounts =>
       UnmodifiableListView(_recentCreditAccounts);
   UnmodifiableListView<Account> get recentDebitAccounts =>
       UnmodifiableListView(_recentDebitAccounts);
 
-  static List<Account> parseAccountCSV(String csv) {
-    // CSV library implementation
+  List<Account> parseAccountCSV(String csv) {
     var _detector = new FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
     );
@@ -94,7 +96,7 @@ class AccountsModel extends ChangeNotifier {
     // Remove header row
     _parsed.removeAt(0);
 
-    var _accounts = <Account>[];
+    final _accounts = <Account>[];
     for (var line in _parsed) {
       final _account = Account.fromList(line);
       final _lastIndex = _account.fullName.lastIndexOf(":");
@@ -103,9 +105,14 @@ class AccountsModel extends ChangeNotifier {
       if (_hasParent) {
         _parentFullName = _account.fullName.substring(0, _lastIndex);
       }
-      _account.parentFullName = _parentFullName;
 
+      _account.parentFullName = _parentFullName;
       _accounts.add(_account);
+
+      if (!_account.placeholder) {
+        // This account is valid to make transactions to/from
+        _validTransactionAccounts.add(_account);
+      }
     }
 
     return _buildAccountsTree(_accounts);

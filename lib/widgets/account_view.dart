@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
+import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
 
 import '../constants.dart';
@@ -23,9 +24,18 @@ class AccountView extends StatelessWidget {
           return FloatingActionButton(
             backgroundColor: Constants.darkBG,
             child: Icon(Icons.add),
-            onPressed: () {
-              Scaffold.of(context).showSnackBar(SnackBar(
-                  content: Text("You tapped the sub-accounts-only button!")));
+            onPressed: () async {
+              final _success = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TransactionForm(),
+                ),
+              );
+
+              if (_success != null && _success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Transaction created!")));
+              }
             },
           );
         }),
@@ -55,11 +65,26 @@ class AccountView extends StatelessWidget {
           return FloatingActionButton(
             backgroundColor: Constants.darkBG,
             child: Icon(Icons.add),
-            onPressed: () {
-              Scaffold.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                      "You tapped the dual sub-accounts/transactions view button!")));
+            onPressed: () async {
+              final _success = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TransactionForm(
+                    toAccount: this.account,
+                  ),
+                ),
+              );
+
+              if (_success != null && _success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Transaction created!")));
+              }
             },
+            // onPressed: () {
+            //   Scaffold.of(context).showSnackBar(SnackBar(
+            //       content: Text(
+            //           "You tapped the dual sub-accounts/transactions view button!")));
+            // },
           );
         }),
       ),
