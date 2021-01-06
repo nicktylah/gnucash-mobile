@@ -6,6 +6,7 @@ import 'package:gnucash_mobile/widgets/export.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
 
@@ -130,26 +131,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   );
 
-                  if (_success) {
+                  if (_success != null && _success) {
+                    Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Transactions exported!")));
                   }
-
-                  // final _transactionsList =
-                  //     Provider.of<TransactionsModel>(context, listen: false)
-                  //         .transactions
-                  //         .map((_transaction) => _transaction.toList())
-                  //         .toList();
-                  // final _csvString =
-                  //     const ListToCsvConverter().convert(_transactionsList);
-                  // print(_csvString);
-                  //
-                  // // Should things be deleted if export is successful?
-                  //
-                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  //   content: Text("You're trying to export stuff!"),
-                  // ));
-                  // Navigator.pop(context);
                 }),
             ListTile(
                 title: Text('Favorites'),
@@ -163,6 +149,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: Text('Delete Accounts'),
                 onTap: () {
                   Provider.of<AccountsModel>(context, listen: false)
+                      .removeAll();
+                  Navigator.pop(context);
+                }),
+            ListTile(
+                title: Text('Delete Transactions'),
+                onTap: () {
+                  Provider.of<TransactionsModel>(context, listen: false)
                       .removeAll();
                   Navigator.pop(context);
                 }),

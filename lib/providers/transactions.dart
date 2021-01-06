@@ -1,6 +1,10 @@
 import 'dart:collection';
+import 'dart:io';
 
+import 'package:csv/csv.dart';
+import 'package:csv/csv_settings_autodetection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Transaction {
   String date;
@@ -72,66 +76,147 @@ class Transaction {
 }
 
 class TransactionsModel extends ChangeNotifier {
-  final _fakeTransactions = [
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
 
-  ];
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/transactions.csv');
+  }
+
+  Future<List<Transaction>> readTransactions() async {
+    try {
+      final file = await _localFile;
+      String contents = await file.readAsString();
+
+      var _detector = new FirstOccurrenceSettingsDetector(
+        eols: ['\r\n', '\n'],
+      );
+
+      final _converter = CsvToListConverter(
+        csvSettingsDetector: _detector,
+        textDelimiter: '"',
+        shouldParseNumbers: false,
+      );
+
+      final _parsed = _converter.convert(contents.trim());
+
+      final _transactions = <Transaction>[];
+      for (var line in _parsed) {
+        final _transaction = Transaction.fromList(line);
+        _transactions.add(_transaction);
+      }
+
+      return _transactions;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  final _fakeTransactions = [];
 
   List<Transaction> _transactions = [];
   // Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
   Map<String, List<Transaction>> _transactionsByAccountFullName = {
-    "Expenses:Food:Delivery": [Transaction.fromList([
-      DateTime.now().toString(),
-      "1",
-      "1",
-      "Test description",
-      "Test notes",
-      "USD",
-      "",
-      "Test action",
-      "Test memo",
-      "Expenses:Food",
-      "Food",
-      "\$10",
-      "10",
-      "n",
-      DateTime.now().toString(),
-      "2",
-    ])],
-    "Expenses:Food": [Transaction.fromList([
-      DateTime.now().toString(),
-      "2",
-      "2",
-      "Test description",
-      "Test notes",
-      "USD",
-      "",
-      "Test action",
-      "Test memo",
-      "Expenses:Food",
-      "Food",
-      "\$12",
-      "12",
-      "n",
-      DateTime.now().toString(),
-      "3",
-    ])]
+    "Expenses:Food:Delivery": [
+      Transaction.fromList([
+        DateTime.now().toString(),
+        "1",
+        "1",
+        "Test description",
+        "Test notes",
+        "USD",
+        "",
+        "Test action",
+        "Test memo",
+        "Expenses:Food",
+        "Food",
+        "\$10",
+        "10",
+        "n",
+        DateTime.now().toString(),
+        "2",
+      ])
+    ],
+    "Expenses:Food": [
+      Transaction.fromList([
+        DateTime.now().toString(),
+        "2",
+        "2",
+        "Test description",
+        "Test notes",
+        "USD",
+        "",
+        "Test action",
+        "Test memo",
+        "Expenses:Food",
+        "Food",
+        "\$12",
+        "12",
+        "n",
+        DateTime.now().toString(),
+        "3",
+      ])
+    ]
   };
 
-  UnmodifiableListView<Transaction> get transactions => UnmodifiableListView(_transactions);
-  UnmodifiableMapView<String, List<Transaction>> get transactionsByAccountFullName => UnmodifiableMapView(_transactionsByAccountFullName);
+  Future<UnmodifiableListView<Transaction>> get transactions async {
+    return await readTransactions();
+    return UnmodifiableListView(_transactions);
+  }
 
-  void add(Transaction transaction) {
-    _transactions.add(transaction);
+  UnmodifiableMapView<String, List<Transaction>>
+      get transactionsByAccountFullName =>
+          UnmodifiableMapView(_transactionsByAccountFullName);
+
+  void add(Transaction transaction) async {
+    final file = await _localFile;
+    final _csvString = const ListToCsvConverter().convert(transaction.toList());
+
+    try {
+      file.writeAsString(
+        _csvString,
+        mode: FileMode.append,
+      );
+    } catch (e) {
+      print(e);
+    }
+
+    // _transactions.add(transaction);
     notifyListeners();
   }
 
-  void addAll(List<Transaction> transactions) {
-    _transactions.addAll(transactions);
+  void addAll(List<Transaction> transactions) async {
+    final file = await _localFile;
+    final _csvString = const ListToCsvConverter()
+        .convert(transactions.map((t) => t.toList()).toList());
+
+    try {
+      file.writeAsString(
+        _csvString,
+        mode: FileMode.append,
+      );
+    } catch (e) {
+      print(e);
+    }
+
+    // _transactions.addAll(transactions);
     notifyListeners();
   }
 
-  void removeAll() {
-    _transactions.clear();
+  void removeAll() async {
+    final file = await _localFile;
+
+    try {
+      file.delete();
+    } catch (e) {
+      print(e);
+    }
+
+    // _transactions.clear();
     notifyListeners();
   }
 }
