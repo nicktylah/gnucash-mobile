@@ -20,7 +20,7 @@ class Transaction {
   String accountName;
   String amountWithSymbol;
   double amount;
-  bool reconcile = false;
+  String reconcile = "n";
   String reconcileDate;
   int ratePrice;
 
@@ -28,7 +28,7 @@ class Transaction {
     final trimmed = [];
     for (var item in items) trimmed.add(item.trim());
 
-    this.date = trimmed[0];
+    this.date = trimmed[0] ?? "";
     this.id = trimmed[1];
     this.number = int.parse(trimmed[2]);
     this.description = trimmed[3];
@@ -41,7 +41,7 @@ class Transaction {
     this.accountName = trimmed[10];
     this.amountWithSymbol = trimmed[11];
     this.amount = double.parse(trimmed[12]);
-    this.reconcile = trimmed[13] == 'n' ? false : true;
+    this.reconcile = trimmed[13];
     this.reconcileDate = trimmed[14];
     this.ratePrice = int.parse(trimmed[15]);
   }
@@ -68,7 +68,7 @@ class Transaction {
       this.accountName ?? "",
       this.amountWithSymbol ?? "",
       this.amount ?? "",
-      this.reconcile ? "n" : "",
+      this.reconcile ?? "",
       this.reconcileDate ?? "",
       this.ratePrice ?? ""
     ];
@@ -87,10 +87,12 @@ class TransactionsModel extends ChangeNotifier {
     return File('$path/transactions.csv');
   }
 
-  Future<List<Transaction>> readTransactions() async {
+  Future<UnmodifiableListView<Transaction>> readTransactions() async {
     try {
       final file = await _localFile;
       String contents = await file.readAsString();
+      print("contents");
+      print(contents);
 
       var _detector = new FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
@@ -103,6 +105,8 @@ class TransactionsModel extends ChangeNotifier {
       );
 
       final _parsed = _converter.convert(contents.trim());
+      print("parsed");
+      print(_parsed);
 
       final _transactions = <Transaction>[];
       for (var line in _parsed) {
@@ -110,8 +114,21 @@ class TransactionsModel extends ChangeNotifier {
         _transactions.add(_transaction);
       }
 
-      return _transactions;
+      return UnmodifiableListView(_transactions);
     } catch (e) {
+      print("readTransactions error");
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String> readTransactionsCsv() async {
+    try {
+      final _file = await _localFile;
+      final _string = await _file.readAsString();
+      return "Date,Transaction ID,Number,Description,Notes,Commodity/Currency,Void Reason,Action,Memo,Full Account Name,Account Name,Amount With Sym.,Amount Num,Reconcile,Reconcile Date,Rate/Price\n$_string";
+    } catch (e) {
+      print(e);
       return null;
     }
   }
@@ -163,9 +180,9 @@ class TransactionsModel extends ChangeNotifier {
     ]
   };
 
-  Future<UnmodifiableListView<Transaction>> get transactions async {
-    return await readTransactions();
-    return UnmodifiableListView(_transactions);
+  Future<UnmodifiableListView<Transaction>> get transactions {
+    return readTransactions();
+    // return UnmodifiableListView(_transactions);
   }
 
   UnmodifiableMapView<String, List<Transaction>>
@@ -178,7 +195,7 @@ class TransactionsModel extends ChangeNotifier {
 
     try {
       file.writeAsString(
-        _csvString,
+        "$_csvString\n",
         mode: FileMode.append,
       );
     } catch (e) {
@@ -196,10 +213,11 @@ class TransactionsModel extends ChangeNotifier {
 
     try {
       file.writeAsString(
-        _csvString,
+        "$_csvString\n",
         mode: FileMode.append,
       );
     } catch (e) {
+      print("addAll error");
       print(e);
     }
 

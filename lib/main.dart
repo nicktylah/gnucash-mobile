@@ -1,4 +1,3 @@
-import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
@@ -6,7 +5,6 @@ import 'package:gnucash_mobile/widgets/export.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'constants.dart';
 
@@ -45,46 +43,46 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final savedAccounts = <Account>[];
 
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (BuildContext context) {
-        final tiles = savedAccounts.map(
-          (Account account) {
-            return new Builder(builder: (context) {
-              return Dismissible(
-                background: Container(color: Colors.red),
-                key: Key(account.fullName),
-                onDismissed: (direction) {
-                  setState(() {
-                    savedAccounts.remove(account);
-                  });
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("${account.fullName} removed")));
-                },
-                child: ListTile(
-                  title: Text(
-                    account.fullName,
-                    style: Constants.biggerFont,
-                  ),
-                ),
-              );
-            });
-          },
-        );
-        final divided = ListTile.divideTiles(
-          context: context,
-          tiles: tiles,
-        ).toList();
-
-        return Scaffold(
-            appBar: AppBar(
-              title: Text('Saved Accounts'),
-            ),
-            body: ListView(children: divided));
-      }),
-    );
-  }
+  // void _pushSaved() {
+  //   Navigator.of(context).push(
+  //     MaterialPageRoute<void>(builder: (BuildContext context) {
+  //       final tiles = savedAccounts.map(
+  //         (Account account) {
+  //           return new Builder(builder: (context) {
+  //             return Dismissible(
+  //               background: Container(color: Colors.red),
+  //               key: Key(account.fullName),
+  //               onDismissed: (direction) {
+  //                 setState(() {
+  //                   savedAccounts.remove(account);
+  //                 });
+  //
+  //                 ScaffoldMessenger.of(context).showSnackBar(
+  //                     SnackBar(content: Text("${account.fullName} removed")));
+  //               },
+  //               child: ListTile(
+  //                 title: Text(
+  //                   account.fullName,
+  //                   style: Constants.biggerFont,
+  //                 ),
+  //               ),
+  //             );
+  //           });
+  //         },
+  //       );
+  //       final divided = ListTile.divideTiles(
+  //         context: context,
+  //         tiles: tiles,
+  //       ).toList();
+  //
+  //       return Scaffold(
+  //           appBar: AppBar(
+  //             title: Text('Saved Accounts'),
+  //           ),
+  //           body: ListView(children: divided));
+  //     }),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +101,13 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
+              child: Text(
+                  "Gnucash Mobile",
+                style: TextStyle(
+                  color: Constants.lightPrimary,
+                  fontSize: 20,
+                ),
+              ),
               decoration: BoxDecoration(
                 color: Constants.darkBG,
               ),
@@ -174,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     );
 
-                    if (_success) {
+                    if (_success != null && _success) {
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Transaction created!")));
                     }

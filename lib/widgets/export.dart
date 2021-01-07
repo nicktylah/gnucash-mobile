@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:csv/csv.dart';
 // All the commented code in this file is for choosing a directory to export to.
 // This works on Android, but on iOS we can't write a file to external storage.
 // import 'package:file_picker/file_picker.dart';
@@ -44,13 +43,14 @@ class _ExportState extends State<Export> {
   Future<String> _getAndFormatTransactions() async {
     final _transactions =
         await Provider.of<TransactionsModel>(context, listen: false)
-            .transactions;
-    final _transactionsList =
-        _transactions.map((_transaction) => _transaction.toList()).toList();
-    final _csvString = const ListToCsvConverter().convert(_transactionsList);
-    print(_csvString);
+            .readTransactionsCsv();
+    print(_transactions);
+    // final _transactionsList =
+    //     _transactions.map((_transaction) => _transaction.toList()).toList();
+    // final _csvString = const ListToCsvConverter().convert(_transactionsList);
+    print(_transactions);
 
-    return _csvString;
+    return _transactions;
     // Should things be deleted if export is successful?
   }
 
@@ -104,6 +104,7 @@ class _ExportState extends State<Export> {
                   await File(_fileName).writeAsString(_transactionsCsv);
 
                   Navigator.pop(context, true);
+                  print(_storageDir);
                 } catch (e) {
                   print(e);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -113,6 +113,12 @@ class AccountsModel extends ChangeNotifier {
         // This account is valid to make transactions to/from
         _validTransactionAccounts.add(_account);
       }
+
+      // This is a hack just for me
+      // TODO: build out the "Favorites" UI
+      if (_account.fullName == "Liabilities:Chase Freedom") {
+        this.favoriteDebitAccount = _account;
+      }
     }
 
     return _buildAccountsTree(_accounts);

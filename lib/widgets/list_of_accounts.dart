@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
-import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
 import 'package:intl/intl.dart';
 
@@ -55,7 +54,7 @@ class ListOfAccounts extends StatelessWidget {
                         backgroundColor: Constants.darkBG,
                         child: Icon(Icons.add),
                         onPressed: () {
-                          Scaffold.of(context).showSnackBar(SnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
                                   "You tapped the transactions-only button!")));
                         },
