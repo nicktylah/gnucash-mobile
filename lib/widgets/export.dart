@@ -64,6 +64,18 @@ class _ExportState extends State<Export> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            FutureBuilder<String>(
+                future: _getAndFormatTransactions(),
+                builder: (context, AsyncSnapshot<String> snapshot) {
+                  if (snapshot.hasData) {
+                    // Remove 1 for header row, divide by 2 for double entry
+                    final _numTransactions =
+                        ("\n".allMatches(snapshot.data).length - 1) / 2;
+                    return Text("${_numTransactions.toInt()} transaction(s)");
+                  } else {
+                    return Text("0 transactions");
+                  }
+                }),
             // Text(
             //   "Export to: $_folder"
             // ),

@@ -29,6 +29,7 @@ class _TransactionFormState extends State<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     _dateInputController.text = DateFormat.yMd().format(DateTime.now());
+    final _node = FocusScope.of(context);
 
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
@@ -53,6 +54,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   hintText: 'Amount',
                 ),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
+                onEditingComplete: () => _node.nextFocus(),
                 onSaved: (value) {
                   final _parsed = double.parse(value);
                   _transactions[0].amount = _parsed;
@@ -64,6 +66,7 @@ class _TransactionFormState extends State<TransactionForm> {
                       NumberFormat.simpleCurrency(decimalDigits: 2)
                           .format(-_parsed);
                 },
+                textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value.isEmpty || double.tryParse(value) == null) {
                     return 'Please enter a valid amount';
@@ -76,9 +79,12 @@ class _TransactionFormState extends State<TransactionForm> {
                 decoration: const InputDecoration(
                   hintText: 'Description',
                 ),
+                onEditingComplete: () => _node.nextFocus(),
                 onSaved: (value) {
                   _transactions[0].description = value;
                 },
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value.isEmpty) {
                     return 'Please enter a valid description';
@@ -179,6 +185,7 @@ class _TransactionFormState extends State<TransactionForm> {
                 decoration: const InputDecoration(
                   hintText: 'Notes',
                 ),
+                textCapitalization: TextCapitalization.sentences,
                 onSaved: (value) {
                   _transactions[0].notes = value;
                 },

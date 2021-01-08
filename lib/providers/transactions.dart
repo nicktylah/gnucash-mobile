@@ -77,8 +77,7 @@ class Transaction {
 
 class TransactionsModel extends ChangeNotifier {
   Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
+    final directory = await getApplicationSupportDirectory();
     return directory.path;
   }
 
