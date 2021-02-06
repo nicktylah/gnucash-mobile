@@ -44,7 +44,6 @@ class _ExportState extends State<Export> {
     final _transactions =
         await Provider.of<TransactionsModel>(context, listen: false)
             .readTransactionsCsv();
-    print(_transactions);
     // final _transactionsList =
     //     _transactions.map((_transaction) => _transaction.toList()).toList();
     // final _csvString = const ListToCsvConverter().convert(_transactionsList);

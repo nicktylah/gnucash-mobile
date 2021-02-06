@@ -92,62 +92,77 @@ class _TransactionFormState extends State<TransactionForm> {
                   return null;
                 },
               ),
-              DropdownButtonFormField<Account>(
-                decoration: const InputDecoration(
-                  hintText: 'Credit Account',
-                ),
-                isExpanded: true,
-                // TODO: Put recently used first
-                items: accounts.validTransactionAccounts.map((account) {
-                  return DropdownMenuItem(
-                    value: account,
-                    child: Text(
-                      account.fullName,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {},
-                onSaved: (value) {
-                  _transactions[0].fullAccountName = value.fullName;
-                  _transactions[0].accountName = value.name;
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please enter a valid account to credit.';
-                  }
-                  return null;
-                },
-                value: widget.toAccount == null
-                    ? accounts.favoriteCreditAccount
-                    : widget
-                        .toAccount,
-              ),
-              DropdownButtonFormField<Account>(
-                decoration: const InputDecoration(
-                  hintText: 'Debit Account',
-                ),
-                isExpanded: true,
-                // TODO: put recently used first
-                items: accounts.validTransactionAccounts.map((account) {
-                  return DropdownMenuItem(
-                    value: account,
-                    child: Text(account.fullName),
-                  );
-                }).toList(),
-                onChanged: (value) {},
-                onSaved: (value) {
-                  _transactions[1].fullAccountName = value.fullName;
-                  _transactions[1].accountName = value.name;
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please enter a valid account to debit';
-                  }
-                  return null;
-                },
-                value: accounts.favoriteDebitAccount,
-              ),
+              FutureBuilder<Account>(
+                  future: Provider.of<AccountsModel>(context, listen: false)
+                      .favoriteCreditAccount,
+                  builder: (context, AsyncSnapshot<Account> snapshot) {
+                    return DropdownButtonFormField<Account>(
+                      decoration: const InputDecoration(
+                        hintText: 'Credit Account',
+                      ),
+                      isExpanded: true,
+                      // TODO: Put recently used first
+                      items: accounts.validTransactionAccounts.map((account) {
+                        return DropdownMenuItem(
+                          value: account,
+                          child: Text(
+                            account.fullName,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {},
+                      onSaved: (value) {
+                        _transactions[0].fullAccountName = value.fullName;
+                        _transactions[0].accountName = value.name;
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please enter a valid account to credit.';
+                        }
+                        return null;
+                      },
+                      value: snapshot.hasData
+                          ? accounts.validTransactionAccounts.firstWhere(
+                              (account) =>
+                                  account.fullName == snapshot.data.fullName)
+                          : widget.toAccount,
+                    );
+                  }),
+              FutureBuilder<Account>(
+                  future: Provider.of<AccountsModel>(context, listen: false)
+                      .favoriteDebitAccount,
+                  builder: (context, AsyncSnapshot<Account> snapshot) {
+                    return DropdownButtonFormField<Account>(
+                      decoration: const InputDecoration(
+                        hintText: 'Debit Account',
+                      ),
+                      isExpanded: true,
+                      // TODO: put recently used first
+                      items: accounts.validTransactionAccounts.map((account) {
+                        return DropdownMenuItem(
+                          value: account,
+                          child: Text(account.fullName),
+                        );
+                      }).toList(),
+                      onChanged: (value) {},
+                      onSaved: (value) {
+                        _transactions[1].fullAccountName = value.fullName;
+                        _transactions[1].accountName = value.name;
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please enter a valid account to debit';
+                        }
+                        return null;
+                      },
+                      value: snapshot.hasData
+                          ? accounts.validTransactionAccounts.firstWhere(
+                              (account) =>
+                                  account.fullName == snapshot.data.fullName)
+                          : null,
+                    );
+                  }),
               TextFormField(
                 decoration: const InputDecoration(
                   hintText: 'Date',

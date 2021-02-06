@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/export.dart';
+import 'package:gnucash_mobile/widgets/favorites.dart';
 import 'package:gnucash_mobile/widgets/intro.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
@@ -86,88 +87,94 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AccountsModel>(builder: (context, accounts, child) {
-      final _hasImported = accounts.accounts.length > 0;
+    return Consumer<AccountsModel>(builder: (context, accountsModel, child) {
+      return FutureBuilder<List<Account>>(
+          future: Provider.of<AccountsModel>(context, listen: false).accounts,
+          builder: (context, AsyncSnapshot<List<Account>> snapshot) {
+            final accounts = snapshot.hasData ? snapshot.data : [];
+            final _hasImported = accounts.length > 0;
 
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: _hasImported
-            ? ListOfAccounts(accounts: accounts.accounts)
-            : Intro(),
-        drawer: Drawer(
-            child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Text(
-                  "Gnucash Mobile",
-                style: TextStyle(
-                  color: Constants.lightPrimary,
-                  fontSize: 20,
-                ),
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(widget.title),
               ),
-              decoration: BoxDecoration(
-                color: Constants.darkBG,
-              ),
-            ),
-            ListTile(
-                title: Text('Import Accounts'),
-                onTap: () {
-                  if (_hasImported) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                          "Accounts already imported. Please remove them first."),
-                    ));
-                  } else {
-                    Provider.of<AccountsModel>(context, listen: false).addAll();
-                  }
-                  Navigator.pop(context);
-                }),
-            ListTile(
-                title: Text('Export'),
-                onTap: () async {
-                  // TODO: Go to export screen with at least a "delete after export" checkbox
-                  final _success = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Export(),
-                    ),
-                  );
+              body: _hasImported
+                  ? ListOfAccounts(accounts: accounts)
+                  : Intro(),
+              drawer: Drawer(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      DrawerHeader(
+                        child: Text(
+                          "Gnucash Mobile",
+                          style: TextStyle(
+                            color: Constants.lightPrimary,
+                            fontSize: 20,
+                          ),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Constants.darkBG,
+                        ),
+                      ),
+                      ListTile(
+                          title: Text('Import Accounts'),
+                          onTap: () {
+                            if (_hasImported) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    "Accounts already imported. Please remove them first."),
+                              ));
+                            } else {
+                              Provider.of<AccountsModel>(context, listen: false)
+                                  .addAll();
+                            }
+                            Navigator.pop(context);
+                          }),
+                      ListTile(
+                          title: Text('Export'),
+                          onTap: () async {
+                            final _success = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Export(),
+                              ),
+                            );
 
-                  if (_success != null && _success) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Transactions exported!")));
-                  }
-                }),
-            ListTile(
-                title: Text('Favorites'),
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("You're trying to set some favorites!"),
-                  ));
-                  Navigator.pop(context);
-                }),
-            ListTile(
-                title: Text('Delete Accounts'),
-                onTap: () {
-                  Provider.of<AccountsModel>(context, listen: false)
-                      .removeAll();
-                  Navigator.pop(context);
-                }),
-            ListTile(
-                title: Text('Delete Transactions'),
-                onTap: () {
-                  Provider.of<TransactionsModel>(context, listen: false)
-                      .removeAll();
-                  Navigator.pop(context);
-                }),
-          ],
-        )),
-        floatingActionButton: _hasImported
-            ? Builder(builder: (context) {
+                            if (_success != null && _success) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Transactions exported!")));
+                            }
+                          }),
+                      ListTile(
+                          title: Text('Favorites'),
+                          onTap: () {
+                             Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Favorites(),
+                              ),
+                            );
+                          }),
+                      ListTile(
+                          title: Text('Delete Accounts'),
+                          onTap: () {
+                            Provider.of<AccountsModel>(context, listen: false)
+                                .removeAll();
+                            Navigator.pop(context);
+                          }),
+                      ListTile(
+                          title: Text('Delete Transactions'),
+                          onTap: () {
+                            Provider.of<TransactionsModel>(context, listen: false)
+                                .removeAll();
+                            Navigator.pop(context);
+                          }),
+                    ],
+                  )),
+              floatingActionButton: _hasImported
+                  ? Builder(builder: (context) {
                 return FloatingActionButton(
                   backgroundColor: Constants.darkBG,
                   child: Icon(Icons.add),
@@ -186,8 +193,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 );
               })
-            : null,
-      );
+                  : null,
+            );
+          });
     });
   }
 }
