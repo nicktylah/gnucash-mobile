@@ -77,7 +77,7 @@ class _ExportState extends State<Export> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 30.0),
                     child: Text(
-                      "$_text will be written to $exportDirectory",
+                      "$_text will be written to this application's directory (/On My iPhone/GnuCashMobile)",
                     ),
                   ),
                   // Text(

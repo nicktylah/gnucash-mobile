@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   DrawerHeader(
                     child: Text(
-                      "Gnucash Mobile",
+                      "GnuCash Mobile",
                       style: TextStyle(
                         color: Constants.lightPrimary,
                         fontSize: 20,
