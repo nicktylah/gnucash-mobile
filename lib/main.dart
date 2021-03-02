@@ -47,47 +47,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final savedAccounts = <Account>[];
 
-  // void _pushSaved() {
-  //   Navigator.of(context).push(
-  //     MaterialPageRoute<void>(builder: (BuildContext context) {
-  //       final tiles = savedAccounts.map(
-  //         (Account account) {
-  //           return new Builder(builder: (context) {
-  //             return Dismissible(
-  //               background: Container(color: Colors.red),
-  //               key: Key(account.fullName),
-  //               onDismissed: (direction) {
-  //                 setState(() {
-  //                   savedAccounts.remove(account);
-  //                 });
-  //
-  //                 ScaffoldMessenger.of(context).showSnackBar(
-  //                     SnackBar(content: Text("${account.fullName} removed")));
-  //               },
-  //               child: ListTile(
-  //                 title: Text(
-  //                   account.fullName,
-  //                   style: Constants.biggerFont,
-  //                 ),
-  //               ),
-  //             );
-  //           });
-  //         },
-  //       );
-  //       final divided = ListTile.divideTiles(
-  //         context: context,
-  //         tiles: tiles,
-  //       ).toList();
-  //
-  //       return Scaffold(
-  //           appBar: AppBar(
-  //             title: Text('Saved Accounts'),
-  //           ),
-  //           body: ListView(children: divided));
-  //     }),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AccountsModel>(builder: (context, accountsModel, child) {
@@ -185,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             SnackBar(content: Text("Accounts deleted.")));
                       }),
                   FutureBuilder(
-                    future: Provider.of<TransactionsModel>(context, listen: false).readTransactions(),
+                    future: Provider.of<TransactionsModel>(context, listen: false).transactions,
                     builder: (context, AsyncSnapshot<List<Transaction>> snapshot) {
                       return ListTile(
                           title: Text('Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)'),

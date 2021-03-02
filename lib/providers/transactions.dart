@@ -24,6 +24,8 @@ class Transaction {
   String reconcileDate;
   int ratePrice;
 
+  Transaction();
+
   Transaction.fromList(List<dynamic> items) {
     final trimmed = [];
     for (var item in items) trimmed.add(item.trim());
@@ -45,8 +47,6 @@ class Transaction {
     this.reconcileDate = trimmed[14];
     this.ratePrice = int.tryParse(trimmed[15]) ?? null;
   }
-
-  Transaction();
 
   @override
   toString() {
@@ -86,51 +86,18 @@ class TransactionsModel extends ChangeNotifier {
     return File('$path/transactions.csv');
   }
 
-  Future<UnmodifiableListView<Transaction>> readTransactions() async {
-    try {
-      final file = await _localFile;
-      String contents = await file.readAsString();
-
-      var _detector = new FirstOccurrenceSettingsDetector(
-        eols: ['\r\n', '\n'],
-      );
-
-      final _converter = CsvToListConverter(
-        csvSettingsDetector: _detector,
-        textDelimiter: '"',
-        shouldParseNumbers: false,
-      );
-
-      final _parsed = _converter.convert(contents.trim());
-
-      final _transactions = <Transaction>[];
-      for (var line in _parsed) {
-        final _transaction = Transaction.fromList(line);
-        _transactions.add(_transaction);
-      }
-
-      return UnmodifiableListView(_transactions);
-    } catch (e) {
-      print("readTransactions error");
-      print(e);
-      return null;
-    }
-  }
-
   Future<String> readTransactionsCsv() async {
     try {
       final _file = await _localFile;
       final _string = await _file.readAsString();
       return "Date,Transaction ID,Number,Description,Notes,Commodity/Currency,Void Reason,Action,Memo,Full Account Name,Account Name,Amount With Sym.,Amount Num,Reconcile,Reconcile Date,Rate/Price\n$_string";
     } catch (e) {
+      print("readTransactionsCsv error");
       print(e);
       return null;
     }
   }
 
-  final _fakeTransactions = [];
-
-  List<Transaction> _transactions = [];
   // Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
   Map<String, List<Transaction>> _transactionsByAccountFullName = {
     "Expenses:Food:Delivery": [
@@ -175,30 +142,39 @@ class TransactionsModel extends ChangeNotifier {
     ]
   };
 
-  Future<UnmodifiableListView<Transaction>> get transactions {
-    return readTransactions();
-    // return UnmodifiableListView(_transactions);
-  }
-
   UnmodifiableMapView<String, List<Transaction>>
-      get transactionsByAccountFullName =>
-          UnmodifiableMapView(_transactionsByAccountFullName);
+  get transactionsByAccountFullName =>
+      UnmodifiableMapView(_transactionsByAccountFullName);
 
-  void add(Transaction transaction) async {
-    final file = await _localFile;
-    final _csvString = const ListToCsvConverter().convert(transaction.toList());
-
+  Future<UnmodifiableListView<Transaction>> get transactions async {
     try {
-      file.writeAsString(
-        "$_csvString\n",
-        mode: FileMode.append,
-      );
-    } catch (e) {
-      print(e);
-    }
+      final file = await _localFile;
+      String contents = await file.readAsString();
 
-    // _transactions.add(transaction);
-    notifyListeners();
+      var _detector = new FirstOccurrenceSettingsDetector(
+        eols: ['\r\n', '\n'],
+      );
+
+      final _converter = CsvToListConverter(
+        csvSettingsDetector: _detector,
+        textDelimiter: '"',
+        shouldParseNumbers: false,
+      );
+
+      final _parsed = _converter.convert(contents.trim());
+
+      final _transactions = <Transaction>[];
+      for (var line in _parsed) {
+        final _transaction = Transaction.fromList(line);
+        _transactions.add(_transaction);
+      }
+
+      return UnmodifiableListView(_transactions);
+    } catch (e) {
+      print("readTransactions error");
+      print(e);
+      return null;
+    }
   }
 
   void addAll(List<Transaction> transactions) async {
@@ -216,7 +192,6 @@ class TransactionsModel extends ChangeNotifier {
       print(e);
     }
 
-    // _transactions.addAll(transactions);
     notifyListeners();
   }
 
@@ -229,7 +204,6 @@ class TransactionsModel extends ChangeNotifier {
       print(e);
     }
 
-    // _transactions.clear();
     notifyListeners();
   }
 }

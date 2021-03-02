@@ -81,21 +81,5 @@ class ListOfAccounts extends StatelessWidget {
     return Container(
       child: _accountsBuilder,
     );
-
-    // return Scaffold(
-    //   body: _accountsBuilder,
-    //   floatingActionButton: FloatingActionButton(
-    //     backgroundColor: Constants.darkBG,
-    //     child: Icon(Icons.add),
-    //     onPressed: () {
-    //       Navigator.push(
-    //         context,
-    //         MaterialPageRoute(
-    //           builder: (context) => TransactionForm(),
-    //         ),
-    //       );
-    //     },
-    //   ),
-    // );
   }
 }

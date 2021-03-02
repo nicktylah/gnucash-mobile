@@ -130,15 +130,16 @@ class AccountsModel extends ChangeNotifier {
   }
 
   void removeFavoriteDebitAccount() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs;
     await prefs.remove('favoriteDebitAccount');
 
     notifyListeners();
   }
 
   Future<Account> get favoriteCreditAccount async {
-    final prefs = await SharedPreferences.getInstance();
-    final favoriteCreditAccountString = prefs.getString('favoriteCreditAccount') ?? null;
+    final prefs = await _prefs;
+    final favoriteCreditAccountString =
+        prefs.getString('favoriteCreditAccount') ?? null;
 
     if (favoriteCreditAccountString != null) {
       return Account.fromJson(jsonDecode(favoriteCreditAccountString));
@@ -148,14 +149,14 @@ class AccountsModel extends ChangeNotifier {
   }
 
   void setFavoriteCreditAccount(Account account) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs;
     await prefs.setString('favoriteCreditAccount', jsonEncode(account));
 
     notifyListeners();
   }
 
   void removeFavoriteCreditAccount() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs;
     await prefs.remove('favoriteCreditAccount');
 
     notifyListeners();
@@ -208,14 +209,10 @@ class AccountsModel extends ChangeNotifier {
     }
     _validTransactionAccounts = _transactionAccounts;
 
-    return _buildAccountsTree(_accounts);
-  }
-
-  static List<Account> _buildAccountsTree(List<Account> accounts) {
     final _lookup = Map<String, Account>();
     final List<Account> _hierarchicalAccounts = [];
 
-    for (var _account in accounts) {
+    for (var _account in _accounts) {
       if (_lookup.containsKey(_account.parentFullName)) {
         final _parent = _lookup[_account.parentFullName];
         _parent.children.add(_account);
@@ -225,7 +222,6 @@ class AccountsModel extends ChangeNotifier {
 
       _lookup[_account.fullName] = _account;
     }
-
     return _hierarchicalAccounts;
   }
 
@@ -233,6 +229,7 @@ class AccountsModel extends ChangeNotifier {
     final file = await _localFile;
     String csvString = await file.readAsString();
     final _parsedAccounts = parseAccountCSV(csvString);
+
     return _parsedAccounts;
   }
 
@@ -249,5 +246,4 @@ class AccountsModel extends ChangeNotifier {
 
     notifyListeners();
   }
-
 }
