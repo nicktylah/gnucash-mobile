@@ -30,7 +30,7 @@ class Transaction {
 
     this.date = trimmed[0] ?? "";
     this.id = trimmed[1];
-    this.number = int.parse(trimmed[2]);
+    this.number = int.tryParse(trimmed[2]) ?? null;
     this.description = trimmed[3];
     this.notes = trimmed[4];
     this.commodityCurrency = trimmed[5];
@@ -40,10 +40,10 @@ class Transaction {
     this.fullAccountName = trimmed[9];
     this.accountName = trimmed[10];
     this.amountWithSymbol = trimmed[11];
-    this.amount = double.parse(trimmed[12]);
+    this.amount = double.tryParse(trimmed[12]) ?? null;
     this.reconcile = trimmed[13];
     this.reconcileDate = trimmed[14];
-    this.ratePrice = int.parse(trimmed[15]);
+    this.ratePrice = int.tryParse(trimmed[15]) ?? null;
   }
 
   Transaction();
@@ -90,8 +90,6 @@ class TransactionsModel extends ChangeNotifier {
     try {
       final file = await _localFile;
       String contents = await file.readAsString();
-      print("contents");
-      print(contents);
 
       var _detector = new FirstOccurrenceSettingsDetector(
         eols: ['\r\n', '\n'],
@@ -104,8 +102,6 @@ class TransactionsModel extends ChangeNotifier {
       );
 
       final _parsed = _converter.convert(contents.trim());
-      print("parsed");
-      print(_parsed);
 
       final _transactions = <Transaction>[];
       for (var line in _parsed) {
@@ -207,7 +203,7 @@ class TransactionsModel extends ChangeNotifier {
 
   void addAll(List<Transaction> transactions) async {
     final file = await _localFile;
-    final _csvString = const ListToCsvConverter()
+    final _csvString = const ListToCsvConverter(eol: "\n")
         .convert(transactions.map((t) => t.toList()).toList());
 
     try {

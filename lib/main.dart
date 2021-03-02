@@ -181,18 +181,30 @@ class _MyHomePageState extends State<MyHomePage> {
                         Provider.of<AccountsModel>(context, listen: false)
                             .removeAll();
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Accounts deleted.")));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Accounts deleted.")));
                       }),
-                  ListTile(
-                      title: Text('Delete Transactions'),
-                      onTap: () {
-                        Provider.of<TransactionsModel>(context, listen: false)
-                            .removeAll();
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Transactions deleted.")));
-                      }),
+                  FutureBuilder(
+                    future: Provider.of<TransactionsModel>(context, listen: false).readTransactions(),
+                    builder: (context, AsyncSnapshot<List<Transaction>> snapshot) {
+                      return ListTile(
+                          title: Text('Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)'),
+                          onTap: () {
+                            if (!snapshot.hasData || snapshot.data.length == 0) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("No transactions to delete.")));
+                              return;
+                            }
+
+                            Provider.of<TransactionsModel>(context, listen: false)
+                                .removeAll();
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Transactions deleted.")));
+                          });
+                    },
+                  ),
                 ],
               )),
               floatingActionButton: _hasImported

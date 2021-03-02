@@ -222,8 +222,6 @@ class _TransactionFormState extends State<TransactionForm> {
               _key.currentState.save();
               Provider.of<TransactionsModel>(context, listen: false)
                   .addAll(_transactions);
-              print(Provider.of<TransactionsModel>(context, listen: false)
-                  .transactions);
               Navigator.pop(context, true);
             } else {
               print("invalid form");

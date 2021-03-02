@@ -85,7 +85,7 @@ class Favorites extends StatelessWidget {
                     accounts.removeFavoriteDebitAccount();
                   },
                   child: Text(
-                    "Remove favorite debit account",
+                    "Clear favorite debit account",
                     style: TextStyle(
                       color: Constants.lightPrimary,
                     ),
@@ -100,7 +100,7 @@ class Favorites extends StatelessWidget {
                     accounts.removeFavoriteCreditAccount();
                   },
                   child: Text(
-                    "Remove favorite credit account",
+                    "Clear favorite credit account",
                     style: TextStyle(
                       color: Constants.lightPrimary,
                     ),
