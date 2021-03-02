@@ -164,10 +164,10 @@ class AccountsModel extends ChangeNotifier {
 
   final List<Account> _recentCreditAccounts = [];
   final List<Account> _recentDebitAccounts = [];
+  List<Account> _accounts;
 
   UnmodifiableListView<Account> get validTransactionAccounts =>
       UnmodifiableListView(_validTransactionAccounts);
-
   UnmodifiableListView<Account> get recentCreditAccounts =>
       UnmodifiableListView(_recentCreditAccounts);
   UnmodifiableListView<Account> get recentDebitAccounts =>
@@ -229,8 +229,13 @@ class AccountsModel extends ChangeNotifier {
     final file = await _localFile;
     String csvString = await file.readAsString();
     final _parsedAccounts = parseAccountCSV(csvString);
+    _accounts = _parsedAccounts;
 
     return _parsedAccounts;
+  }
+
+  Account getAccountByFullName(String fullName) {
+    return _accounts.firstWhere((element) => element.fullName == fullName);
   }
 
   void addAll(String csv) async {

@@ -50,14 +50,6 @@ class _ExportState extends State<Export> {
   //   });
   // }
 
-  Future<String> _getAndFormatTransactions() async {
-    final _transactions =
-        await Provider.of<TransactionsModel>(context, listen: false)
-            .readTransactionsCsv();
-
-    return _transactions;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

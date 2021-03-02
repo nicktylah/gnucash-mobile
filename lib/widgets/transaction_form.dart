@@ -82,6 +82,7 @@ class _TransactionFormState extends State<TransactionForm> {
                 onEditingComplete: () => _node.nextFocus(),
                 onSaved: (value) {
                   _transactions[0].description = value;
+                  _transactions[1].description = value;
                 },
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.next,

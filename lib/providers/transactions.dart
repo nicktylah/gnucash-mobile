@@ -98,53 +98,12 @@ class TransactionsModel extends ChangeNotifier {
     }
   }
 
-  // Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
-  Map<String, List<Transaction>> _transactionsByAccountFullName = {
-    "Expenses:Food:Delivery": [
-      Transaction.fromList([
-        DateTime.now().toString(),
-        "1",
-        "1",
-        "Test description",
-        "Test notes",
-        "USD",
-        "",
-        "Test action",
-        "Test memo",
-        "Expenses:Food",
-        "Food",
-        "\$10",
-        "10",
-        "n",
-        DateTime.now().toString(),
-        "2",
-      ])
-    ],
-    "Expenses:Food": [
-      Transaction.fromList([
-        DateTime.now().toString(),
-        "2",
-        "2",
-        "Test description",
-        "Test notes",
-        "USD",
-        "",
-        "Test action",
-        "Test memo",
-        "Expenses:Food",
-        "Food",
-        "\$12",
-        "12",
-        "n",
-        DateTime.now().toString(),
-        "3",
-      ])
-    ]
-  };
+  Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
 
   UnmodifiableMapView<String, List<Transaction>>
-  get transactionsByAccountFullName =>
-      UnmodifiableMapView(_transactionsByAccountFullName);
+  get transactionsByAccountFullName {
+    return UnmodifiableMapView(_transactionsByAccountFullName);
+  }
 
   Future<UnmodifiableListView<Transaction>> get transactions async {
     try {
@@ -164,10 +123,20 @@ class TransactionsModel extends ChangeNotifier {
       final _parsed = _converter.convert(contents.trim());
 
       final _transactions = <Transaction>[];
+      final Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
       for (var line in _parsed) {
         final _transaction = Transaction.fromList(line);
         _transactions.add(_transaction);
+
+        // Add to representation of balances
+        if (_transactionsByAccountFullName.containsKey(_transaction.fullAccountName)) {
+          _transactionsByAccountFullName[_transaction.fullAccountName].add(_transaction);
+        } else {
+          _transactionsByAccountFullName[_transaction.fullAccountName] = [_transaction];
+        }
       }
+
+      this._transactionsByAccountFullName = _transactionsByAccountFullName;
 
       return UnmodifiableListView(_transactions);
     } catch (e) {
@@ -192,6 +161,15 @@ class TransactionsModel extends ChangeNotifier {
       print(e);
     }
 
+    // Add to representation of balances
+    for (var _transaction in transactions) {
+      if (_transactionsByAccountFullName.containsKey(_transaction.fullAccountName)) {
+        _transactionsByAccountFullName[_transaction.fullAccountName].add(_transaction);
+      } else {
+        _transactionsByAccountFullName[_transaction.fullAccountName] = [_transaction];
+      }
+    }
+
     notifyListeners();
   }
 
@@ -203,6 +181,8 @@ class TransactionsModel extends ChangeNotifier {
     } catch (e) {
       print(e);
     }
+
+    _transactionsByAccountFullName.clear();
 
     notifyListeners();
   }

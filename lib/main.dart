@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             SnackBar(content: Text("Accounts deleted.")));
                       }),
                   FutureBuilder(
-                    future: Provider.of<TransactionsModel>(context, listen: false).transactions,
+                    future: Provider.of<TransactionsModel>(context, listen: true).transactions,
                     builder: (context, AsyncSnapshot<List<Transaction>> snapshot) {
                       return ListTile(
                           title: Text('Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)'),

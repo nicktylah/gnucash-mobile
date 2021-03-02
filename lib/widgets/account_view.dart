@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
+import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/list_of_accounts.dart';
 import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
+import 'package:provider/provider.dart';
 
 import '../constants.dart';
 
@@ -58,7 +60,7 @@ class AccountView extends StatelessWidget {
         body: TabBarView(
           children: [
             ListOfAccounts(accounts: this.account.children),
-            TransactionsView(account: this.account)
+            TransactionsView(transactions: Provider.of<TransactionsModel>(context, listen: false).transactionsByAccountFullName[this.account.fullName] ?? [])
           ],
         ),
         floatingActionButton: Builder(builder: (context) {
@@ -80,11 +82,6 @@ class AccountView extends StatelessWidget {
                     SnackBar(content: Text("Transaction created!")));
               }
             },
-            // onPressed: () {
-            //   Scaffold.of(context).showSnackBar(SnackBar(
-            //       content: Text(
-            //           "You tapped the dual sub-accounts/transactions view button!")));
-            // },
           );
         }),
       ),

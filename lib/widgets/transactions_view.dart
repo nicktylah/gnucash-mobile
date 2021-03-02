@@ -1,26 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:provider/provider.dart';
 
 class TransactionsView extends StatelessWidget {
-  final Account account;
+  final List<Transaction> transactions;
 
-  TransactionsView(
-      {Key key, @required this.account})
-      : super(key: key);
+  TransactionsView({Key key, @required this.transactions}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<TransactionsModel>(builder: (context, transactions, child) {
-
-      List<Transaction> _transactionsForAccount = [];
-      if (transactions.transactionsByAccountFullName
-          .containsKey(this.account.fullName)) {
-        _transactionsForAccount = transactions
-            .transactionsByAccountFullName[this.account.fullName];
-      }
-
       final _transactionsBuilder = ListView.builder(
         itemBuilder: (context, index) {
           if (index.isOdd) {
@@ -28,17 +17,19 @@ class TransactionsView extends StatelessWidget {
           }
 
           final int i = index ~/ 2;
-          if (i >= _transactionsForAccount.length) {
+          if (i >= this.transactions.length) {
             return null;
           }
 
-          final _transaction = _transactionsForAccount[i];
+          final _transaction = this.transactions[i];
           return ListTile(
               title: Text(
                 _transaction.description,
               ),
               trailing: Text(_transaction.amountWithSymbol),
-              onTap: () {});
+              onTap: () {
+                print(_transaction);
+              });
         },
         padding: EdgeInsets.all(16.0),
         shrinkWrap: true,
