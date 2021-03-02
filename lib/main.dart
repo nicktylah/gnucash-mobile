@@ -181,6 +181,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         Provider.of<AccountsModel>(context, listen: false)
                             .removeAll();
                         Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("Accounts deleted.")));
                       }),
                   ListTile(
                       title: Text('Delete Transactions'),
@@ -188,6 +190,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         Provider.of<TransactionsModel>(context, listen: false)
                             .removeAll();
                         Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("Transactions deleted.")));
                       }),
                 ],
               )),

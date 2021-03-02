@@ -1,6 +1,6 @@
 import 'dart:io';
 
-// All the commented code in this file is for choosing a directory to export to.
+// The commented code in this file is for choosing a directory to export to.
 // This works on Android, but on iOS we can't write a file to external storage.
 // import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +29,16 @@ class _ExportState extends State<Export> {
   // TextEditingController _controller = TextEditingController();
 
   bool deleteTransactionsOnExport = false;
+  String exportDirectory;
+
+  @override
+  void initState() {
+    getApplicationDocumentsDirectory().then((value) {
+      exportDirectory = value.path;
+    });
+
+    super.initState();
+  }
 
   // void _selectFolder() {
   //   FilePicker.platform.getDirectoryPath().then((value) {
@@ -44,13 +54,8 @@ class _ExportState extends State<Export> {
     final _transactions =
         await Provider.of<TransactionsModel>(context, listen: false)
             .readTransactionsCsv();
-    // final _transactionsList =
-    //     _transactions.map((_transaction) => _transaction.toList()).toList();
-    // final _csvString = const ListToCsvConverter().convert(_transactionsList);
-    print(_transactions);
 
     return _transactions;
-    // Should things be deleted if export is successful?
   }
 
   @override
@@ -60,74 +65,96 @@ class _ExportState extends State<Export> {
         title: Text("Export Transactions"),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            FutureBuilder<String>(
-                future: _getAndFormatTransactions(),
-                builder: (context, AsyncSnapshot<String> snapshot) {
-                  if (snapshot.hasData) {
-                    // Remove 1 for header row, divide by 2 for double entry
-                    final _numTransactions =
-                        ("\n".allMatches(snapshot.data).length - 1) / 2;
-                    return Text("${_numTransactions.toInt()} transaction(s)");
-                  } else {
-                    return Text("0 transactions");
-                  }
-                }),
-            // Text(
-            //   "Export to: $_folder"
-            // ),
-            // FlatButton(
-            //   color: Constants.darkAccent,
-            //   onPressed: () => _selectFolder(),
-            //   child: Text("Pick folder"),
-            //   textColor: Constants.lightPrimary,
-            // ),
-            CheckboxListTile(
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
-              title: Text('Delete transactions on successful export'),
-              value: deleteTransactionsOnExport,
-              onChanged: (value) {
-                setState(() {
-                  deleteTransactionsOnExport = value;
-                });
-              },
-            ),
-            FlatButton(
-              color: Constants.darkAccent,
-              onPressed: () async {
-                // if (_directoryPath == null) {
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //       SnackBar(content: Text("Please choose a valid directory")));
-                //   return null;
-                // }
+        child: FutureBuilder(
+            future: Provider.of<TransactionsModel>(context, listen: false)
+                .readTransactionsCsv(),
+            builder: (context, AsyncSnapshot<String> snapshot) {
+              String _text;
+              if (snapshot.hasData) {
+                // Remove 1 for header row, divide by 2 for double entry
+                final _numTransactions =
+                    ("\n".allMatches(snapshot.data).length - 1) / 2;
+                _text = "${_numTransactions.toInt()} transaction(s)";
+              } else {
+                _text = "0 transactions";
+              }
 
-                final _yearMonthDay =
-                    DateFormat('yyyyMMdd').format(DateTime.now());
-                try {
-                  final _storageDir = await getApplicationDocumentsDirectory();
-                  final _fileName =
-                      "${_storageDir.path}/${_yearMonthDay}_${DateTime.now().millisecond}.gnucash_transactions.csv";
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Text(
+                      "$_text will be written to $exportDirectory",
+                    ),
+                  ),
+                  // Text(
+                  //   "Export to: $_folder"
+                  // ),
+                  // FlatButton(
+                  //   color: Constants.darkAccent,
+                  //   onPressed: () => _selectFolder(),
+                  //   child: Text("Pick folder"),
+                  //   textColor: Constants.lightPrimary,
+                  // ),
+                  CheckboxListTile(
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
+                    title: Text('Delete transactions on successful export'),
+                    value: deleteTransactionsOnExport,
+                    onChanged: (value) {
+                      setState(() {
+                        deleteTransactionsOnExport = value;
+                      });
+                    },
+                  ),
+                  TextButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Constants.darkAccent),
+                    ),
+                    onPressed: () async {
+                      // if (_directoryPath == null) {
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(content: Text("Please choose a valid directory")));
+                      //   return null;
+                      // }
 
-                  final _transactionsCsv = await _getAndFormatTransactions();
-                  await File(_fileName).writeAsString(_transactionsCsv);
+                      if (!snapshot.hasData) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("No transactions to export.")));
+                        return;
+                      }
 
-                  Navigator.pop(context, true);
-                  print(_storageDir);
-                } catch (e) {
-                  print(e);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                          "Error exporting! Please try a different directory")));
-                }
-              },
-              child: Text("Export"),
-              textColor: Constants.lightPrimary,
-            ),
-          ],
-        ),
+                      final _yearMonthDay =
+                          DateFormat('yyyyMMdd').format(DateTime.now());
+                      try {
+                        final _fileName =
+                            "$exportDirectory/${_yearMonthDay}_${DateTime.now().millisecond}.gnucash_transactions.csv";
+                        await File(_fileName).writeAsString(snapshot.data);
+
+                        if (deleteTransactionsOnExport) {
+                          Provider.of<TransactionsModel>(context, listen: false)
+                              .removeAll();
+                        }
+
+                        Navigator.pop(context, true);
+                      } catch (e) {
+                        print(e);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Error exporting!")));
+                      }
+                    },
+                    child: Text(
+                      "Export",
+                      style: TextStyle(
+                        color: Constants.lightPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
