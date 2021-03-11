@@ -60,7 +60,7 @@ class AccountView extends StatelessWidget {
         body: TabBarView(
           children: [
             ListOfAccounts(accounts: this.account.children),
-            TransactionsView(transactions: Provider.of<TransactionsModel>(context, listen: false).transactionsByAccountFullName[this.account.fullName] ?? [])
+            TransactionsView(transactions: Provider.of<TransactionsModel>(context, listen: true).transactionsByAccountFullName[this.account.fullName] ?? [])
           ],
         ),
         floatingActionButton: Builder(builder: (context) {

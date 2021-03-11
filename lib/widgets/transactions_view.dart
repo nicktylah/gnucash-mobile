@@ -36,7 +36,9 @@ class TransactionsView extends StatelessWidget {
       );
 
       return Container(
-        child: _transactionsBuilder,
+        child: this.transactions.length > 0
+            ? _transactionsBuilder
+            : Center(child: Text("No transactions.")),
       );
     });
   }

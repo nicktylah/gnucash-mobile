@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
+import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -31,9 +32,11 @@ class ListOfAccounts extends StatelessWidget {
 
             final _account = this.accounts[i];
             final List<Transaction> _transactions = [];
-            for (var key in transactionsModel.transactionsByAccountFullName.keys) {
+            for (var key
+                in transactionsModel.transactionsByAccountFullName.keys) {
               if (key.startsWith(_account.fullName)) {
-                _transactions.addAll(transactionsModel.transactionsByAccountFullName[key]);
+                _transactions.addAll(
+                    transactionsModel.transactionsByAccountFullName[key]);
               }
             }
             final double _balance = _transactions.fold(0.0,
@@ -57,16 +60,31 @@ class ListOfAccounts extends StatelessWidget {
                           title: Text(_account.fullName),
                         ),
                         body: TransactionsView(
-                          transactions: _transactions,
-                        ),
+                            transactions: Provider.of<TransactionsModel>(
+                                            context,
+                                            listen: true)
+                                        .transactionsByAccountFullName[
+                                    _account.fullName] ??
+                                []),
                         floatingActionButton: Builder(builder: (context) {
                           return FloatingActionButton(
                             backgroundColor: Constants.darkBG,
                             child: Icon(Icons.add),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      "You tapped the transactions-only button!")));
+                            onPressed: () async {
+                              final _success = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TransactionForm(
+                                    toAccount: _account,
+                                  ),
+                                ),
+                              );
+
+                              if (_success != null && _success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text("Transaction created!")));
+                              }
                             },
                           );
                         }),
