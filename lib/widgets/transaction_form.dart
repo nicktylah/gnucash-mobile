@@ -98,37 +98,39 @@ class _TransactionFormState extends State<TransactionForm> {
                       .favoriteCreditAccount,
                   builder: (context, AsyncSnapshot<Account> snapshot) {
                     return DropdownButtonFormField<Account>(
-                      decoration: const InputDecoration(
-                        hintText: 'Credit Account',
-                      ),
-                      isExpanded: true,
-                      // TODO: Put recently used first
-                      items: accounts.validTransactionAccounts.map((account) {
-                        return DropdownMenuItem(
-                          value: account,
-                          child: Text(
-                            account.fullName,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {},
-                      onSaved: (value) {
-                        _transactions[0].fullAccountName = value.fullName;
-                        _transactions[0].accountName = value.name;
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please enter a valid account to credit.';
-                        }
-                        return null;
-                      },
-                      value: snapshot.hasData
-                          ? accounts.validTransactionAccounts.firstWhere(
-                              (account) =>
-                                  account.fullName == snapshot.data.fullName)
-                          : widget.toAccount,
-                    );
+                        decoration: const InputDecoration(
+                          hintText: 'Credit Account',
+                        ),
+                        isExpanded: true,
+                        // TODO: Put recently used first
+                        items: accounts.validTransactionAccounts.map((account) {
+                          return DropdownMenuItem(
+                            value: account,
+                            child: Text(
+                              account.fullName,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {},
+                        onSaved: (value) {
+                          _transactions[0].fullAccountName = value.fullName;
+                          _transactions[0].accountName = value.name;
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please enter a valid account to credit.';
+                          }
+                          return null;
+                        },
+                        value: snapshot.hasData
+                            ? accounts.validTransactionAccounts.firstWhere(
+                                (account) =>
+                                    account.fullName == snapshot.data.fullName)
+                            : accounts.validTransactionAccounts.firstWhere(
+                                (account) =>
+                                    account.fullName ==
+                                    widget.toAccount.fullName));
                   }),
               FutureBuilder<Account>(
                   future: Provider.of<AccountsModel>(context, listen: false)
@@ -221,6 +223,11 @@ class _TransactionFormState extends State<TransactionForm> {
             if (_key.currentState.validate()) {
               // Process data.
               _key.currentState.save();
+
+              final id = UniqueKey().toString();
+              _transactions[0].id = id;
+              _transactions[1].id = id;
+
               Provider.of<TransactionsModel>(context, listen: false)
                   .addAll(_transactions);
               Navigator.pop(context, true);

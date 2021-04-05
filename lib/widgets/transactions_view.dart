@@ -22,14 +22,23 @@ class TransactionsView extends StatelessWidget {
           }
 
           final _transaction = this.transactions[i];
-          return ListTile(
-              title: Text(
-                _transaction.description,
-              ),
-              trailing: Text(_transaction.amountWithSymbol),
-              onTap: () {
-                print(_transaction);
-              });
+          return Dismissible(
+            background: Container(color: Colors.red),
+            key: Key(_transaction.description + _transaction.fullAccountName),
+            onDismissed: (direction) async {
+              transactions.remove(_transaction);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text("Transaction removed.")));
+            },
+            child: ListTile(
+                title: Text(
+                  _transaction.description,
+                ),
+                trailing: Text(_transaction.amountWithSymbol),
+                onTap: () {
+                  print(_transaction);
+                }),
+          );
         },
         padding: EdgeInsets.all(16.0),
         shrinkWrap: true,

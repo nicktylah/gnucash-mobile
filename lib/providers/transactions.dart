@@ -101,7 +101,7 @@ class TransactionsModel extends ChangeNotifier {
   Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
 
   UnmodifiableMapView<String, List<Transaction>>
-  get transactionsByAccountFullName {
+      get transactionsByAccountFullName {
     return UnmodifiableMapView(_transactionsByAccountFullName);
   }
 
@@ -123,16 +123,21 @@ class TransactionsModel extends ChangeNotifier {
       final _parsed = _converter.convert(contents.trim());
 
       final _transactions = <Transaction>[];
-      final Map<String, List<Transaction>> _transactionsByAccountFullName = Map();
+      final Map<String, List<Transaction>> _transactionsByAccountFullName =
+          Map();
       for (var line in _parsed) {
         final _transaction = Transaction.fromList(line);
         _transactions.add(_transaction);
 
         // Add to representation of balances
-        if (_transactionsByAccountFullName.containsKey(_transaction.fullAccountName)) {
-          _transactionsByAccountFullName[_transaction.fullAccountName].add(_transaction);
+        if (_transactionsByAccountFullName
+            .containsKey(_transaction.fullAccountName)) {
+          _transactionsByAccountFullName[_transaction.fullAccountName]
+              .add(_transaction);
         } else {
-          _transactionsByAccountFullName[_transaction.fullAccountName] = [_transaction];
+          _transactionsByAccountFullName[_transaction.fullAccountName] = [
+            _transaction
+          ];
         }
       }
 
@@ -163,10 +168,14 @@ class TransactionsModel extends ChangeNotifier {
 
     // Add to representation of balances
     for (var _transaction in transactions) {
-      if (_transactionsByAccountFullName.containsKey(_transaction.fullAccountName)) {
-        _transactionsByAccountFullName[_transaction.fullAccountName].add(_transaction);
+      if (_transactionsByAccountFullName
+          .containsKey(_transaction.fullAccountName)) {
+        _transactionsByAccountFullName[_transaction.fullAccountName]
+            .add(_transaction);
       } else {
-        _transactionsByAccountFullName[_transaction.fullAccountName] = [_transaction];
+        _transactionsByAccountFullName[_transaction.fullAccountName] = [
+          _transaction
+        ];
       }
     }
 
@@ -185,5 +194,42 @@ class TransactionsModel extends ChangeNotifier {
     _transactionsByAccountFullName.clear();
 
     notifyListeners();
+  }
+
+  Future<bool> remove(Transaction transaction) async {
+    try {
+      final file = await _localFile;
+      final lines = await file.readAsLines();
+
+      final toRemove = [];
+      for (var line in lines) {
+        if (line.contains(transaction.id)) {
+          toRemove.add(line);
+        }
+      }
+
+      if (toRemove.length == 0) {
+        return false;
+      }
+
+      for (var line in toRemove) {
+        lines.remove(line);
+      }
+
+      file.writeAsString(lines.toString());
+
+      // TODO: Remove this hack attack-y way of refreshing the transactions state
+      _transactionsByAccountFullName.clear();
+      await transactions;
+
+      notifyListeners();
+
+      return true;
+    } catch (err) {
+      print("removeTransaction error");
+      print(err);
+
+      return false;
+    }
   }
 }
