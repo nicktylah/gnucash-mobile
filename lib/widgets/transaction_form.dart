@@ -19,6 +19,7 @@ class _TransactionFormState extends State<TransactionForm> {
   @override
   void initState() {
     super.initState();
+    _dateInputController.text = DateFormat.yMd().format(DateTime.now());
   }
 
   final _key = GlobalKey<FormState>();
@@ -28,7 +29,6 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
-    _dateInputController.text = DateFormat.yMd().format(DateTime.now());
     final _node = FocusScope.of(context);
 
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
