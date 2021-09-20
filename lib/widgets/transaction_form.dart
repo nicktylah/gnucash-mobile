@@ -23,9 +23,19 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   final _key = GlobalKey<FormState>();
+  final _simpleCurrencyNumberFormat =
+      NumberFormat.simpleCurrency(locale: Intl.getCurrentLocale());
+  final _visibleAmountInputController = TextEditingController();
   final _dateInputController = TextEditingController();
   // Credit account, debit account
   final _transactions = [Transaction(), Transaction()];
+
+  @override
+  void dispose() {
+    _visibleAmountInputController.dispose();
+    _dateInputController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,31 +58,41 @@ class _TransactionFormState extends State<TransactionForm> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             children: <Widget>[
-              TextFormField(
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Amount',
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                onEditingComplete: () => _node.nextFocus(),
-                onSaved: (value) {
-                  final _parsed = double.parse(value);
-                  _transactions[0].amount = _parsed;
-                  _transactions[0].amountWithSymbol =
-                      NumberFormat.simpleCurrency(decimalDigits: 2)
-                          .format(_parsed);
-                  _transactions[1].amount = -_parsed;
-                  _transactions[1].amountWithSymbol =
-                      NumberFormat.simpleCurrency(decimalDigits: 2)
-                          .format(-_parsed);
-                },
-                textInputAction: TextInputAction.next,
-                validator: (value) {
-                  if (value.isEmpty || double.tryParse(value) == null) {
-                    return 'Please enter a valid amount';
-                  }
+              Focus(
+                child: TextFormField(
+                  autofocus: true,
+                  controller: _visibleAmountInputController,
+                  decoration: const InputDecoration(
+                    hintText: 'Amount',
+                  ),
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  onEditingComplete: () => _node.nextFocus(),
+                  onSaved: (value) {
+                    final _amount = _simpleCurrencyNumberFormat.parse(value);
+                    _transactions[0].amount = _amount;
+                    _transactions[0].amountWithSymbol = value;
+                    _transactions[1].amount = -_amount;
+                    _transactions[1].amountWithSymbol = "-" + value;
+                  },
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter a valid amount';
+                    }
 
-                  return null;
+                    return null;
+                  },
+                ),
+                onFocusChange: (hasFocus) {
+                  if (!hasFocus) {
+                    final _rawValue = _visibleAmountInputController.value.text;
+                    final _simpleCurrencyValue = _simpleCurrencyNumberFormat
+                        .format(_simpleCurrencyNumberFormat.parse(_rawValue));
+                    _visibleAmountInputController.value =
+                        _visibleAmountInputController.value.copyWith(
+                      text: _simpleCurrencyValue,
+                    );
+                  }
                 },
               ),
               TextFormField(
