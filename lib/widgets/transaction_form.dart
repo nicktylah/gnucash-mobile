@@ -23,8 +23,6 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   final _key = GlobalKey<FormState>();
-  final _simpleCurrencyNumberFormat =
-      NumberFormat.simpleCurrency(locale: Intl.getCurrentLocale());
   final _visibleAmountInputController = TextEditingController();
   final _dateInputController = TextEditingController();
   // Credit account, debit account
@@ -40,6 +38,8 @@ class _TransactionFormState extends State<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final _node = FocusScope.of(context);
+    final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
+        locale: Localizations.localeOf(context).toString());
 
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
