@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/number_symbols_data.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:gnucash_mobile/widgets/export.dart';
@@ -31,6 +33,16 @@ class MyApp extends StatelessWidget {
       theme: Constants.lightTheme,
       darkTheme: Constants.darkTheme,
       home: MyHomePage(title: 'Accounts'),
+      supportedLocales: numberFormatSymbols.keys
+          .where((key) => key.toString().contains('_'))
+          .map((key) => key.toString().split('_'))
+          .map((split) => Locale(split[0], split[1]))
+          .toList(),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }
@@ -144,23 +156,31 @@ class _MyHomePageState extends State<MyHomePage> {
                             SnackBar(content: Text("Accounts deleted.")));
                       }),
                   FutureBuilder(
-                    future: Provider.of<TransactionsModel>(context, listen: true).transactions,
-                    builder: (context, AsyncSnapshot<List<Transaction>> snapshot) {
+                    future:
+                        Provider.of<TransactionsModel>(context, listen: true)
+                            .transactions,
+                    builder:
+                        (context, AsyncSnapshot<List<Transaction>> snapshot) {
                       return ListTile(
-                          title: Text('Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)'),
+                          title: Text(
+                              'Delete ${snapshot.hasData ? snapshot.data.length ~/ 2 : 0} Transaction(s)'),
                           onTap: () {
-                            if (!snapshot.hasData || snapshot.data.length == 0) {
+                            if (!snapshot.hasData ||
+                                snapshot.data.length == 0) {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("No transactions to delete.")));
+                                  SnackBar(
+                                      content:
+                                          Text("No transactions to delete.")));
                               return;
                             }
 
-                            Provider.of<TransactionsModel>(context, listen: false)
+                            Provider.of<TransactionsModel>(context,
+                                    listen: false)
                                 .removeAll();
                             Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Transactions deleted.")));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text("Transactions deleted.")));
                           });
                     },
                   ),
