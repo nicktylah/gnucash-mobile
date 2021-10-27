@@ -10,6 +10,7 @@ class Favorites extends StatelessWidget {
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: Constants.darkBG,
           title: Text("Favorites"),
         ),
         body: Padding(

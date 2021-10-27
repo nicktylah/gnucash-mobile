@@ -16,6 +16,9 @@ class ListOfAccounts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
+        locale: Localizations.localeOf(context).toString());
+
     return Container(
       child: Consumer<TransactionsModel>(
           builder: (context, transactionsModel, child) {
@@ -41,6 +44,8 @@ class ListOfAccounts extends StatelessWidget {
             }
             final double _balance = _transactions.fold(0.0,
                 (previousValue, element) => previousValue + element.amount);
+            final _simpleCurrencyValue = _simpleCurrencyNumberFormat
+                .format(_simpleCurrencyNumberFormat.parse(_balance.toString()));
 
             return ListTile(
               title: Text(
@@ -48,7 +53,7 @@ class ListOfAccounts extends StatelessWidget {
                 style: Constants.biggerFont,
               ),
               trailing: Text(
-                NumberFormat.simpleCurrency(decimalDigits: 2).format(_balance),
+                _simpleCurrencyValue
               ),
               onTap: () {
                 if (_account.children.length == 0) {
@@ -57,6 +62,7 @@ class ListOfAccounts extends StatelessWidget {
                     MaterialPageRoute(builder: (context) {
                       return Scaffold(
                         appBar: AppBar(
+                          backgroundColor: Constants.darkBG,
                           title: Text(_account.fullName),
                         ),
                         body: TransactionsView(

@@ -44,6 +44,7 @@ class _TransactionFormState extends State<TransactionForm> {
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: Constants.darkBG,
           title: Text("New transaction"),
           leading: Builder(builder: (context) {
             return IconButton(

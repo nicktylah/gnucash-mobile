@@ -19,6 +19,7 @@ class AccountView extends StatelessWidget {
     if (this.account.placeholder) {
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: Constants.darkBG,
           title: Text(this.account.fullName),
         ),
         body: ListOfAccounts(accounts: this.account.children),

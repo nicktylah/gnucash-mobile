@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TransactionsView extends StatelessWidget {
@@ -7,8 +8,12 @@ class TransactionsView extends StatelessWidget {
 
   TransactionsView({Key key, @required this.transactions}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
+    final _simpleCurrencyNumberFormat = NumberFormat.simpleCurrency(
+        locale: Localizations.localeOf(context).toString());
+
     return Consumer<TransactionsModel>(builder: (context, transactions, child) {
       final _transactionsBuilder = ListView.builder(
         itemBuilder: (context, index) {
@@ -22,6 +27,8 @@ class TransactionsView extends StatelessWidget {
           }
 
           final _transaction = this.transactions[i];
+          final _simpleCurrencyValue = _simpleCurrencyNumberFormat
+              .format(_simpleCurrencyNumberFormat.parse(_transaction.amount.toString()));
           return Dismissible(
             background: Container(color: Colors.red),
             key: Key(_transaction.description + _transaction.fullAccountName),
@@ -34,7 +41,7 @@ class TransactionsView extends StatelessWidget {
                 title: Text(
                   _transaction.description,
                 ),
-                trailing: Text(_transaction.amountWithSymbol),
+                trailing: Text(_simpleCurrencyValue),
                 onTap: () {
                   print(_transaction);
                 }),

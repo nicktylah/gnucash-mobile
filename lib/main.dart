@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
             return Scaffold(
               appBar: AppBar(
+                backgroundColor: Constants.darkBG,
                 title: Text(widget.title),
               ),
               body: _hasImported ? ListOfAccounts(accounts: accounts) : Intro(),
