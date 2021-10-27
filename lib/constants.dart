@@ -36,6 +36,7 @@ class Constants {
     accentColor: darkAccent,
     scaffoldBackgroundColor: darkBG,
     appBarTheme: AppBarTheme(
+      backgroundColor: darkBG,
       elevation: 0,
       textTheme: TextTheme(
         headline6: TextStyle(
