@@ -148,10 +148,12 @@ class _TransactionFormState extends State<TransactionForm> {
                             ? accounts.validTransactionAccounts.firstWhere(
                                 (account) =>
                                     account.fullName == snapshot.data.fullName)
-                            : accounts.validTransactionAccounts.firstWhere(
-                                (account) =>
-                                    account.fullName ==
-                                    widget.toAccount.fullName));
+                            : widget.toAccount != null
+                                ? accounts.validTransactionAccounts.firstWhere(
+                                    (account) =>
+                                        account.fullName ==
+                                        widget.toAccount.fullName)
+                                : null);
                   }),
               FutureBuilder<Account>(
                   future: Provider.of<AccountsModel>(context, listen: false)
