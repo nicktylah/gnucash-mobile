@@ -62,7 +62,7 @@ class ListOfAccounts extends StatelessWidget {
                     MaterialPageRoute(builder: (context) {
                       return Scaffold(
                         appBar: AppBar(
-                          backgroundColor: Constants.darkBG,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                           title: Text(_account.fullName),
                         ),
                         body: TransactionsView(
@@ -74,7 +74,7 @@ class ListOfAccounts extends StatelessWidget {
                                 []),
                         floatingActionButton: Builder(builder: (context) {
                           return FloatingActionButton(
-                            backgroundColor: Constants.darkBG,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                             child: Icon(Icons.add),
                             onPressed: () async {
                               final _success = await Navigator.push(

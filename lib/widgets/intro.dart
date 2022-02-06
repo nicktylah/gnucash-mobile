@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:gnucash_mobile/constants.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:provider/provider.dart';
 
@@ -12,12 +11,11 @@ class Intro extends StatelessWidget {
     return Center(
       child: TextButton(
         style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(Constants.darkAccent),
+          backgroundColor: MaterialStateProperty.all<Color>(
+              Theme.of(context).colorScheme.primary),
         ),
         onPressed: () async {
           FilePickerResult result = await FilePicker.platform.pickFiles();
-
           if (result != null) {
             try {
               final _file = File(result.files.single.path);
@@ -36,7 +34,7 @@ class Intro extends StatelessWidget {
         child: Text(
           "Import",
           style: TextStyle(
-            color: Constants.lightPrimary,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
       ),

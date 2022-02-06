@@ -9,8 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
-
 class Export extends StatefulWidget {
   @override
   _ExportState createState() => _ExportState();
@@ -84,10 +82,10 @@ class _ExportState extends State<Export> {
                   //   "Export to: $_folder"
                   // ),
                   // FlatButton(
-                  //   color: Constants.darkAccent,
+                  //   color: Constants.mutedBlue,
                   //   onPressed: () => _selectFolder(),
                   //   child: Text("Pick folder"),
-                  //   textColor: Constants.lightPrimary,
+                  //   textColor: Theme.of(context).colorScheme.onPrimary,
                   // ),
                   CheckboxListTile(
                     contentPadding:
@@ -103,7 +101,7 @@ class _ExportState extends State<Export> {
                   TextButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
-                          Constants.darkAccent),
+                          Theme.of(context).colorScheme.primary),
                     ),
                     onPressed: () async {
                       // if (_directoryPath == null) {
@@ -113,8 +111,8 @@ class _ExportState extends State<Export> {
                       // }
 
                       if (!snapshot.hasData) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("No transactions to export.")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("No transactions to export.")));
                         return;
                       }
 
@@ -140,7 +138,7 @@ class _ExportState extends State<Export> {
                     child: Text(
                       "Export",
                       style: TextStyle(
-                        color: Constants.lightPrimary,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),
