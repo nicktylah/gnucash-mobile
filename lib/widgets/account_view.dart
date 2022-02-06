@@ -6,8 +6,6 @@ import 'package:gnucash_mobile/widgets/transaction_form.dart';
 import 'package:gnucash_mobile/widgets/transactions_view.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
-
 class AccountView extends StatelessWidget {
   final Account account;
 
@@ -19,13 +17,13 @@ class AccountView extends StatelessWidget {
     if (this.account.placeholder) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Constants.darkBG,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: Text(this.account.fullName),
         ),
         body: ListOfAccounts(accounts: this.account.children),
         floatingActionButton: Builder(builder: (context) {
           return FloatingActionButton(
-            backgroundColor: Constants.darkBG,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             child: Icon(Icons.add),
             onPressed: () async {
               final _success = await Navigator.push(
@@ -70,7 +68,7 @@ class AccountView extends StatelessWidget {
         ),
         floatingActionButton: Builder(builder: (context) {
           return FloatingActionButton(
-            backgroundColor: Constants.darkBG,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             child: Icon(Icons.add),
             onPressed: () async {
               final _success = await Navigator.push(

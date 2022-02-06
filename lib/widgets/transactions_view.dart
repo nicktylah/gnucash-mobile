@@ -30,7 +30,7 @@ class TransactionsView extends StatelessWidget {
           final _simpleCurrencyValue = _simpleCurrencyNumberFormat
               .format(_simpleCurrencyNumberFormat.parse(_transaction.amount.toString()));
           return Dismissible(
-            background: Container(color: Colors.red),
+            background: Container(color: Theme.of(context).colorScheme.error),
             key: Key(_transaction.description + _transaction.fullAccountName),
             onDismissed: (direction) async {
               transactions.remove(_transaction);

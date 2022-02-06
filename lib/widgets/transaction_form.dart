@@ -5,8 +5,6 @@ import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
-
 class TransactionForm extends StatefulWidget {
   final Account toAccount;
 
@@ -44,7 +42,7 @@ class _TransactionFormState extends State<TransactionForm> {
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Constants.darkBG,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: Text("New transaction"),
           leading: Builder(builder: (context) {
             return IconButton(
@@ -238,7 +236,7 @@ class _TransactionFormState extends State<TransactionForm> {
         floatingActionButton:
             // Builder(builder: (context) {
             FloatingActionButton(
-          backgroundColor: Constants.darkBG,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           child: Icon(Icons.save_sharp),
           onPressed: () {
             // Validate will return true if the form is valid, or false if

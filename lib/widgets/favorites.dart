@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/accounts.dart';
 import 'package:provider/provider.dart';
 
-import '../constants.dart';
-
 class Favorites extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AccountsModel>(builder: (context, accounts, child) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Constants.darkBG,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: Text("Favorites"),
         ),
         body: Padding(
@@ -79,8 +77,8 @@ class Favorites extends StatelessWidget {
                 ),
                 TextButton(
                   style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Constants.darkAccent),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.primary),
                   ),
                   onPressed: () {
                     accounts.removeFavoriteDebitAccount();
@@ -88,14 +86,14 @@ class Favorites extends StatelessWidget {
                   child: Text(
                     "Clear favorite debit account",
                     style: TextStyle(
-                      color: Constants.lightPrimary,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 ),
                 TextButton(
                   style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Constants.darkAccent),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.primary),
                   ),
                   onPressed: () {
                     accounts.removeFavoriteCreditAccount();
@@ -103,7 +101,7 @@ class Favorites extends StatelessWidget {
                   child: Text(
                     "Clear favorite credit account",
                     style: TextStyle(
-                      color: Constants.lightPrimary,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 ),
