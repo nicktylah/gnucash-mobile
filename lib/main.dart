@@ -30,8 +30,30 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: Constants.appName,
-      theme: Constants.lightTheme,
-      darkTheme: Constants.darkTheme,
+      theme: Constants.lightTheme.copyWith(
+        scaffoldBackgroundColor: Constants.lightTheme.colorScheme.background,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Constants.lightTheme.colorScheme.primary,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Constants.lightTheme.colorScheme.onPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      darkTheme: Constants.darkTheme.copyWith(
+        scaffoldBackgroundColor: Constants.darkTheme.colorScheme.background,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Constants.darkTheme.colorScheme.primary,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Constants.darkTheme.colorScheme.onPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
       home: MyHomePage(title: 'Accounts'),
       supportedLocales: numberFormatSymbols.keys
           .where((key) => key.toString().contains('_'))
@@ -70,7 +92,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
             return Scaffold(
               appBar: AppBar(
-                backgroundColor: Constants.darkBG,
                 title: Text(widget.title),
               ),
               body: _hasImported ? ListOfAccounts(accounts: accounts) : Intro(),
@@ -82,12 +103,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text(
                       "GnuCash Mobile",
                       style: TextStyle(
-                        color: Constants.lightPrimary,
                         fontSize: 20,
                       ),
                     ),
                     decoration: BoxDecoration(
-                      color: Constants.darkBG,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   ListTile(
@@ -190,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
               floatingActionButton: _hasImported
                   ? Builder(builder: (context) {
                       return FloatingActionButton(
-                        backgroundColor: Constants.darkBG,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         child: Icon(Icons.add),
                         onPressed: () async {
                           final _success = await Navigator.push(
