@@ -2,7 +2,7 @@ import 'dart:io';
 
 // The commented code in this file is for choosing a directory to export to.
 // This works on Android, but on iOS we can't write a file to external storage.
-// import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gnucash_mobile/providers/transactions.dart';
 import 'package:intl/intl.dart';
@@ -17,38 +17,31 @@ class Export extends StatefulWidget {
 }
 
 class _ExportState extends State<Export> {
-  // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  // String _fileName;
-  // List<PlatformFile> _paths;
-  // String _directoryPath;
-  // String _folder;
-  // String _extension;
-  // bool _loadingPath = false;
-  // bool _multiPick = false;
-  // FileType _pickingType = FileType.any;
-  // TextEditingController _controller = TextEditingController();
+  String _directoryPath;
+  String _directory;
 
   bool deleteTransactionsOnExport = false;
-  String exportDirectory;
 
   @override
   void initState() {
-    getApplicationDocumentsDirectory().then((value) {
-      exportDirectory = value.path;
-    });
+    if (Platform.isIOS) {
+      getApplicationDocumentsDirectory().then((value) {
+        _directoryPath = value.path;
+      });
+    }
 
     super.initState();
   }
 
-  // void _selectFolder() {
-  //   FilePicker.platform.getDirectoryPath().then((value) {
-  //     if (value == null) return;
-  //     setState(() {
-  //       _directoryPath = value;
-  //       _folder = value.substring(value.lastIndexOf("/"));
-  //     });
-  //   });
-  // }
+  void _selectFolder() {
+    FilePicker.platform.getDirectoryPath().then((value) {
+      if (value == null) return;
+      setState(() {
+        _directoryPath = value;
+        _directory = value.substring(value.lastIndexOf("/"));
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,19 +69,27 @@ class _ExportState extends State<Export> {
                 children: <Widget>[
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 30.0),
-                    child: Text(
-                      "$_text will be written to this application's directory (/On My iPhone/GnuCashMobile)",
-                    ),
+                    child: Platform.isIOS
+                        ? Text(
+                            "$_text will be written to this application's directory (/On My iPhone/GnuCashMobile)",
+                          )
+                        : Text("Export to: $_directory"),
                   ),
-                  // Text(
-                  //   "Export to: $_folder"
-                  // ),
-                  // FlatButton(
-                  //   color: Constants.darkAccent,
-                  //   onPressed: () => _selectFolder(),
-                  //   child: Text("Pick folder"),
-                  //   textColor: Constants.lightPrimary,
-                  // ),
+                  Platform.isIOS
+                      ? SizedBox.shrink()
+                      : TextButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Constants.darkAccent),
+                          ),
+                          onPressed: () => _selectFolder(),
+                          child: Text(
+                            "Pick directory",
+                            style: TextStyle(
+                              color: Constants.lightPrimary,
+                            ),
+                          ),
+                        ),
                   CheckboxListTile(
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
@@ -106,15 +107,15 @@ class _ExportState extends State<Export> {
                           Constants.darkAccent),
                     ),
                     onPressed: () async {
-                      // if (_directoryPath == null) {
-                      //   ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(content: Text("Please choose a valid directory")));
-                      //   return null;
-                      // }
+                      if (_directoryPath == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("Please choose a valid directory")));
+                        return null;
+                      }
 
                       if (!snapshot.hasData) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("No transactions to export.")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("No transactions to export.")));
                         return;
                       }
 
@@ -122,7 +123,7 @@ class _ExportState extends State<Export> {
                           DateFormat('yyyyMMdd').format(DateTime.now());
                       try {
                         final _fileName =
-                            "$exportDirectory/${_yearMonthDay}_${DateTime.now().millisecond}.gnucash_transactions.csv";
+                            "$_directoryPath/${_yearMonthDay}_${DateTime.now().millisecond}.gnucash_transactions.csv";
                         await File(_fileName).writeAsString(snapshot.data);
 
                         if (deleteTransactionsOnExport) {
