@@ -44,8 +44,7 @@ class ListOfAccounts extends StatelessWidget {
             }
             final double _balance = _transactions.fold(0.0,
                 (previousValue, element) => previousValue + element.amount);
-            final _simpleCurrencyValue = _simpleCurrencyNumberFormat
-                .format(_simpleCurrencyNumberFormat.parse(_balance.toString()));
+            final _simpleCurrencyValue = _simpleCurrencyNumberFormat.format(_balance);
 
             return ListTile(
               title: Text(
