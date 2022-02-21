@@ -27,8 +27,8 @@ class TransactionsView extends StatelessWidget {
           }
 
           final _transaction = this.transactions[i];
-          final _simpleCurrencyValue = _simpleCurrencyNumberFormat
-              .format(_simpleCurrencyNumberFormat.parse(_transaction.amount.toString()));
+          final _simpleCurrencyValue =
+              _simpleCurrencyNumberFormat.format(_transaction.amount);
           return Dismissible(
             background: Container(color: Colors.red),
             key: Key(_transaction.description + _transaction.fullAccountName),
