@@ -150,11 +150,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   ListTile(
                       title: Text('Delete Accounts'),
                       onTap: () {
-                        Provider.of<AccountsModel>(context, listen: false)
-                            .removeAll();
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Accounts deleted.")));
+                        _showConfirm(context, 'Are you sure you want to delete accounts?', () {
+                          Provider.of<AccountsModel>(context, listen: false)
+                              .removeAll();
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Accounts deleted.")));
+                        }, () {
+                          Navigator.of(context).pop();
+                        });
                       }),
                   FutureBuilder(
                     future:
@@ -173,15 +177,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                   SnackBar(
                                       content:
                                           Text("No transactions to delete.")));
-                              return;
                             }
 
-                            Provider.of<TransactionsModel>(context,
-                                    listen: false)
-                                .removeAll();
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text("Transactions deleted.")));
+                            _showConfirm(context, 'Are you sure you want to delete transactions?', () {
+                              Provider.of<TransactionsModel>(context,
+                                  listen: false)
+                                  .removeAll();
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text("Transactions deleted.")));
+                            }, () {
+                              Navigator.of(context).pop();
+                            });
                           });
                     },
                   ),
@@ -211,5 +218,34 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           });
     });
+  }
+
+  void _showConfirm(BuildContext context, String message, Function() onConfirm, Function() onCancel) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes'),
+              onPressed: onConfirm,
+            ),
+            TextButton(
+              child: Text('No'),
+              onPressed: onCancel,
+            ),
+          ],
+        );
+      },
+    );
   }
 }
