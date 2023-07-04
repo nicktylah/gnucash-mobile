@@ -33,7 +33,7 @@ class TransactionsView extends StatelessWidget {
             background: Container(color: Colors.red),
             key: Key(_transaction.description + _transaction.fullAccountName),
             onDismissed: (direction) async {
-              transactions.remove(_transaction);
+              transactions.remove(_transaction.id);
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text("Transaction removed.")));
             },

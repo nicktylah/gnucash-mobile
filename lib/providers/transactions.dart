@@ -196,14 +196,14 @@ class TransactionsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> remove(Transaction transaction) async {
+  Future<bool> remove(String transactionID) async {
     try {
       final file = await _localFile;
       final lines = await file.readAsLines();
 
       final toRemove = [];
       for (var line in lines) {
-        if (line.contains(transaction.id)) {
+        if (line.contains(transactionID)) {
           toRemove.add(line);
         }
       }
