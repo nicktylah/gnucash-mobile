@@ -150,7 +150,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ListTile(
                       title: Text('Delete Accounts'),
                       onTap: () {
-                        _showConfirm(context, 'Are you sure you want to delete accounts?', () {
+                        _showConfirm(context,
+                            'Are you sure you want to delete accounts?', () {
                           Provider.of<AccountsModel>(context, listen: false)
                               .removeAll();
                           Navigator.pop(context);
@@ -179,13 +180,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                           Text("No transactions to delete.")));
                             }
 
-                            _showConfirm(context, 'Are you sure you want to delete transactions?', () {
+                            _showConfirm(context,
+                                'Are you sure you want to delete transactions?',
+                                () {
                               Provider.of<TransactionsModel>(context,
-                                  listen: false)
+                                      listen: false)
                                   .removeAll();
                               Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text("Transactions deleted.")));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text("Transactions deleted.")));
                             }, () {
                               Navigator.of(context).pop();
                             });
@@ -220,7 +224,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _showConfirm(BuildContext context, String message, Function() onConfirm, Function() onCancel) async {
+  void _showConfirm(BuildContext context, String message, Function() onConfirm,
+      Function() onCancel) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,

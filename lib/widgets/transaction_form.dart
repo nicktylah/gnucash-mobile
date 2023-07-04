@@ -9,8 +9,12 @@ import '../constants.dart';
 
 class TransactionForm extends StatefulWidget {
   final Account toAccount;
+  final Transaction creditTransaction;
+  final Transaction debitTransaction;
 
-  TransactionForm({Key key, this.toAccount}) : super(key: key);
+  TransactionForm(
+      {Key key, this.toAccount, this.creditTransaction, this.debitTransaction})
+      : super(key: key);
   @override
   _TransactionFormState createState() => _TransactionFormState();
 }
@@ -20,13 +24,16 @@ class _TransactionFormState extends State<TransactionForm> {
   void initState() {
     super.initState();
     _dateInputController.text = DateFormat.yMd().format(DateTime.now());
+    this._transactions = widget.creditTransaction != null
+        ? [widget.creditTransaction, widget.debitTransaction]
+        : [Transaction(), Transaction()];
   }
 
   final _key = GlobalKey<FormState>();
   final _visibleAmountInputController = TextEditingController();
   final _dateInputController = TextEditingController();
   // Credit account, debit account
-  final _transactions = [Transaction(), Transaction()];
+  var _transactions;
 
   @override
   void dispose() {

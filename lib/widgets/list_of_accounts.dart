@@ -44,16 +44,15 @@ class ListOfAccounts extends StatelessWidget {
             }
             final double _balance = _transactions.fold(0.0,
                 (previousValue, element) => previousValue + element.amount);
-            final _simpleCurrencyValue = _simpleCurrencyNumberFormat.format(_balance);
+            final _simpleCurrencyValue =
+                _simpleCurrencyNumberFormat.format(_balance);
 
             return ListTile(
               title: Text(
                 _account.name,
                 style: Constants.biggerFont,
               ),
-              trailing: Text(
-                _simpleCurrencyValue
-              ),
+              trailing: Text(_simpleCurrencyValue),
               onTap: () {
                 if (_account.children.length == 0) {
                   Navigator.push(
