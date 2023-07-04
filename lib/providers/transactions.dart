@@ -196,6 +196,52 @@ class TransactionsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<Transaction>> get(String transactionID) async {
+    try {
+      final file = await _localFile;
+      String contents = await file.readAsString();
+
+      var _detector = new FirstOccurrenceSettingsDetector(
+        eols: ['\r\n', '\n'],
+      );
+
+      final _converter = CsvToListConverter(
+        csvSettingsDetector: _detector,
+        textDelimiter: '"',
+        shouldParseNumbers: false,
+      );
+
+      final _parsed = _converter.convert(contents.trim());
+
+      final _transactions = <Transaction>[];
+      for (var line in _parsed) {
+        if (line.contains(transactionID)) {
+          final _transaction = Transaction.fromList(line);
+          _transactions.add(_transaction);
+        }
+      }
+
+      if (_transactions.length == 0) {
+        print("get error; no transactions found");
+        print(_transactions);
+        return [];
+      }
+
+      if (_transactions.length != 2) {
+        print("get error; transactions found, but more or less than 2");
+        print(_transactions);
+        return [];
+      }
+
+      return _transactions;
+    } catch (err) {
+      print("getTransaction error");
+      print(err);
+
+      return [];
+    }
+  }
+
   Future<bool> remove(String transactionID) async {
     try {
       final file = await _localFile;

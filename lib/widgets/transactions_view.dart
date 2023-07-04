@@ -48,9 +48,14 @@ class TransactionsView extends StatelessWidget {
                   final _success = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TransactionForm(),
+                      builder: (context) => TransactionForm(transactionID: _transaction.id,),
                     ),
                   );
+
+                  if (_success != null && _success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Transaction updated!")));
+                  }
                 }),
           );
         },
